@@ -2,15 +2,12 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\RecoversPdfData;
 use Illuminate\Http\Request;
 
-
-
-class RecoverPdf extends Controller
+class RecoverFamilias extends Controller
 {
     use RecoversPdfData;
 
@@ -19,7 +16,7 @@ class RecoverPdf extends Controller
         return $this->recoverPdfResponse($request);
     }
 
-    public function recoverPdf(Request $request)
+    public function recoverFamilias(Request $request)
     {
         return $this->buildPdfQuery($request)->get();
     }

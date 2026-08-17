@@ -82,8 +82,7 @@ class LabelService
  
     private function saveTempImage(string $base64Image, string $dir, string $name): array
     {
-        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
-            $type        = strtoupper($matches[1]);
+        if (preg_match('/^data:image\/\w+;base64,/', $base64Image)) {
             $base64Image = preg_replace('/^data:image\/\w+;base64,/', '', $base64Image);
         }
 
@@ -93,8 +92,12 @@ class LabelService
             throw new \RuntimeException("Invalid base64 image data for: {$name}");
         }
 
-        if (!isset($type)) {
-            $type = str_starts_with($imageData, "\xFF\xD8\xFF") ? 'JPEG' : 'PNG';
+        if (str_starts_with($imageData, "\x89PNG\r\n\x1a\n")) {
+            $type = 'PNG';
+        } elseif (str_starts_with($imageData, "\xFF\xD8\xFF")) {
+            $type = 'JPEG';
+        } else {
+            throw new \RuntimeException("Unsupported or corrupt image data for: {$name}");
         }
 
         $ext  = $type === 'JPEG' ? 'jpg' : 'png';

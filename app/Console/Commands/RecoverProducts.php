@@ -45,6 +45,8 @@ class RecoverProducts extends Command
 
         $products = $this->getAllDailyProducts($this->loja);
 
+
+
         if ($products->isEmpty()) {
             $this->error('Nenhum produto encontrado');
             return;
@@ -64,21 +66,22 @@ class RecoverProducts extends Command
                     return [
                         "product"             => $product->PRODUTO,
                         "quantity"            => $product->TOTAL_IMPRESSOES,
-                        "promotion"           => $product->PROCFIT_TIPO_ID,
+
                         "description"         => $product->DESCRICAO_REDUZIDA,
-                        "ean"                 => "ean: " . $product->EAN,
+                        "ean"                 =>  $product->EAN,
                         "max_price"           => $product->PRECO_MAXIMO,
-                        "sail_price"          => $product->PRECO_VENDA,
-                        "promotion_price"     => $product->SUBTITULO_2 ?? $product->PRECO_VENDA,
+                        "sail_price"          => $product->PRECO_MAXIMO,
+                        "promotion_price"     => $product->PRECO_PROMOCAO,
                         "percentage_discount" => $product->SUBTITULO_1,
                         "initial_date"        => $product->DATA_INICIAL,
                         "final_date"          => $product->DATA_FINAL,
                         "buy"                 => $product->LEVE,
                         "get"                 => $product->PAGUE,
-                        "promotion_title"     => $product->TITULO_ETIQUETA,
+                        "promotion_title"     => $product->TITULO_PROMOCAO_2,
                         "expiration_date"     => $product->VALIDADE,
                         "X"                   => $product->LEVE,
                         "Y"                   => $product->PAGUE,
+                        'nameplate_label_printing' => $product->IMPRESSAO_ETIQUETA_PLACA
                     ];
                 })->values()->toArray();
 
@@ -99,13 +102,15 @@ class RecoverProducts extends Command
 
 
                     if ($responseData['status'] === 'success') {
-                        $paths[] = [
-                            'path' =>  asset(' public/img/' . $responseData['pdf']),
-                            'template_id' => $first->ID_TEMPLATE,
-                            'type' => $first->TIPO_TEMPLATE
-                        ];
+                        foreach ($responseData['pdfs'] ?? [['pdf' => $responseData['pdf']]] as $generatedPdf) {
+                            $paths[] = [
+                                'path' =>  asset(' public/img/' . $generatedPdf['pdf']),
+                                'template_id' => $first->ID_TEMPLATE,
+                                'type' => $first->TIPO_TEMPLATE
+                            ];
+                        }
 
-                        $this->sendNotification($first->loja, $paths);
+                        $this->sendNotification(1, $paths);
 
                         $paths = [];
 
@@ -120,6 +125,7 @@ class RecoverProducts extends Command
                         $this->info("Template {$first->ID_TEMPLATE} | Loja {$first->loja} gerado com sucesso." . now()->format('d/m/Y H:i:s'));
                     }
                 } catch (\Throwable $th) {
+
                     $this->error("Erro no template {$first->ID_TEMPLATE} | Loja {$first->loja}: " . $th->getMessage());
                     continue;
                 }
@@ -135,6 +141,8 @@ class RecoverProducts extends Command
 
     public function sendNotification($loja, $paths)
     {
+
+
         $content = "<p>Bom dia, loja {$loja}.</br>Devido à precificação, alguns produtos tiveram mudanças em seus preços. Abaixo você pode conferir as etiquetas criadas, separadas por template. Obrigado pela sua atenção.</p>";
         if (!empty($paths)) {
             $templateIds = array_column($paths, 'template_id');
@@ -173,7 +181,7 @@ class RecoverProducts extends Command
         </table>";
         }
 
-        
+
 
         try {
             $notification = new SendNotification();
@@ -183,7 +191,7 @@ class RecoverProducts extends Command
                 'content'       => $content,
                 'category_id'   => 13,
                 'user_id'       => 2,
-                'recipient_ids' => [3],
+                'recipient_ids' => [$loja],
             ]);
 
             if ($response->successful()) {

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
@@ -13,7 +13,7 @@ class RecoverPromotions extends Controller
     public function __invoke()
     {
 
-       $promotions = $this->getPromotions(); 
+        $promotions = $this->getPromotions();
 
 
         return response()->json([
@@ -29,7 +29,5 @@ class RecoverPromotions extends Controller
         $promotions = TypePromotions::getAllPromotions();
 
         return $promotions;
-
-    
     }
 }

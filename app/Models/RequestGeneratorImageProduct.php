@@ -17,8 +17,9 @@ class RequestGeneratorImageProduct extends Model
     protected $fillable = [
         'REQUISICAO_GERADOR_PLACAS',
         'PRODUTO',
-        'PROMOCAO'
-       
+        'FAMILIA',
+        'ETIQUETA_PLACAS_RESULTADO_ID'
+
     ];
 
 
@@ -32,10 +33,12 @@ class RequestGeneratorImageProduct extends Model
     public static function alreadyExists(array $data): bool
     {
         return static::where('PRODUTO', $data['PRODUTO'])
-            ->whereHas('tableMaster', fn ($q) => $q
-                ->where('TEMPLATE_ID', $data['TEMPLATE_ID'])
-                ->where('LOJA', $data['LOJA'])
-                ->where('DATA_REQUISICAO', $data['DATA_REQUISICAO'])
+            ->whereHas(
+                'tableMaster',
+                fn($q) => $q
+                    ->where('TEMPLATE_ID', $data['TEMPLATE_ID'])
+                    ->where('LOJA', $data['LOJA'])
+                    ->where('DATA_REQUISICAO', $data['DATA_REQUISICAO'])
             )
             ->exists();
     }

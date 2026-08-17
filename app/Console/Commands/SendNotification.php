@@ -1,22 +1,20 @@
-<?php 
+<?php
 
 
 namespace App\Console\Commands;
+
 use Illuminate\Support\Facades\Http;
 
 
-Class SendNotification {
+class SendNotification
+{
 
-    public function Notification($dados)  {
+    public function Notification($dados)
+    {
 
-    $response = Http::post('http://notificacao.promofarma.int/api/v1/notifications',$dados);
+        $response = Http::post('http://notificacao_http:80/api/v1/notifications', $dados);
 
 
-    return $response;
-
-        
+        return $response;
     }
-
-
-
 }

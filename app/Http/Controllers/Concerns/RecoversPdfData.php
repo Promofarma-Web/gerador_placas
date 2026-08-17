@@ -101,6 +101,7 @@ trait RecoversPdfData
                     'LOJA'                      => $first->LOJA,
                     'DESCRICAO_PROMOCAO'        => $first->DESCRICAO_PROMOCAO,
                     'PRODUTOS'                  => $group
+                        ->filter(fn ($row) => (int) $row->PRODUTO !== 0)
                         ->unique(fn ($row) => $row->PRODUTO . '|' . $row->DESCRICAO_REDUZIDA)
                         ->map(function ($row) {
                             return [
@@ -109,6 +110,7 @@ trait RecoversPdfData
                             ];
                         })->values(),
                     'FAMILIA'                   => $group
+                        ->filter(fn ($row) => (int) $row->FAMILIA_PRODUTO !== 0)
                         ->unique(fn ($row) => $row->FAMILIA_PRODUTO . '|' . $row->FAMILIA_DESCRICAO)
                         ->map(function ($row) {
                             return [

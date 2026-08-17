@@ -34,7 +34,7 @@ trait RecoversPdfData
                 $query->where('B.PROMOCAO', $request->promotion);
             })
             ->distinct()
-            ->tap(fn (Builder $query) => $this->selectPdfColumns($query));
+            ->tap(fn(Builder $query) => $this->selectPdfColumns($query));
     }
 
     protected function buildPdfByStoreQuery(Request $request): Builder
@@ -42,7 +42,7 @@ trait RecoversPdfData
         return RequestGeneratorImage::query()
             ->from('REQUISICOES_GERADOR_PLACAS as RGP')
             ->join('REQUISICOES_GERADOR_PLACAS_PRODUTOS as B', 'RGP.REQUISICAO_GERADOR_PLACAS', '=', 'B.REQUISICAO_GERADOR_PLACAS')
-            ->leftJoin('PBS_PROMOFARMA_DADOS.dbo.ETIQUETA_PLACAS_RESULTADO as C', 'C.IMPRESSAO_ETIQUETA_PLACA', '=', 'B.ETIQUETA_PLACAS_RESULTADO_ID')
+            ->leftJoin('PBS_PROMOFARMA_DADOS.dbo.ETIQUETA_PLACAS_RESULTADO as C', 'C.ID', '=', 'B.ETIQUETA_PLACAS_RESULTADO_ID')
             ->leftJoin('PBS_PROMOFARMA_DADOS.dbo.PRODUTOS as D', 'B.PRODUTO', '=', 'D.PRODUTO')
             ->leftJoin('PBS_PROMOFARMA_DADOS.dbo.FAMILIAS_PRODUTOS as F', 'F.FAMILIA_PRODUTO', '=', 'B.FAMILIA')
             ->whereRaw('(B.ETIQUETA_PLACAS_RESULTADO_ID IS NULL OR CAST(GETDATE() AS DATE) BETWEEN C.DATA_INICIAL AND C.DATA_FINAL)')
@@ -101,8 +101,8 @@ trait RecoversPdfData
                     'LOJA'                      => $first->LOJA,
                     'DESCRICAO_PROMOCAO'        => $first->DESCRICAO_PROMOCAO,
                     'PRODUTOS'                  => $group
-                        ->filter(fn ($row) => (int) $row->PRODUTO !== 0)
-                        ->unique(fn ($row) => $row->PRODUTO . '|' . $row->DESCRICAO_REDUZIDA)
+                        ->filter(fn($row) => (int) $row->PRODUTO !== 0)
+                        ->unique(fn($row) => $row->PRODUTO . '|' . $row->DESCRICAO_REDUZIDA)
                         ->map(function ($row) {
                             return [
                                 'PRODUTO'            => $row->PRODUTO,
@@ -110,8 +110,8 @@ trait RecoversPdfData
                             ];
                         })->values(),
                     'FAMILIA'                   => $group
-                        ->filter(fn ($row) => (int) $row->FAMILIA_PRODUTO !== 0)
-                        ->unique(fn ($row) => $row->FAMILIA_PRODUTO . '|' . $row->FAMILIA_DESCRICAO)
+                        ->filter(fn($row) => (int) $row->FAMILIA_PRODUTO !== 0)
+                        ->unique(fn($row) => $row->FAMILIA_PRODUTO . '|' . $row->FAMILIA_DESCRICAO)
                         ->map(function ($row) {
                             return [
                                 'FAMILIA_PRODUTO' => $row->FAMILIA_PRODUTO,

@@ -110,7 +110,7 @@ class RecoverProducts extends Command
                             ];
                         }
 
-                        $this->sendNotification(1, $paths);
+                        $this->sendNotification($first->loja, $paths);
 
                         $paths = [];
 

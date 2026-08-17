@@ -27,13 +27,14 @@ class DailyProducts extends Model
             ->pluck('ETIQUETA_PLACAS_RESULTADO_ID')
             ->toArray();
 
+
+
         $products = DailyProducts::query()
             ->whereNotNull('ID_TEMPLATE')
             ->whereNotNull('LOJA')
             ->whereNotIn('ID', $idsGerados)
             ->where('loja', $loja)
-            ->where('ID_TEMPLATE', 93)
-            ->where('PRODUTO', 1133701)
+
             ->get()
             ->map(function ($item) {
                 $item->TIPO_TEMPLATE = in_array($item->ID_TEMPLATE, [95, 94, 93, 92, 91]) ? 1 : 2;

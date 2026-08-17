@@ -66,7 +66,6 @@ class RecoverProducts extends Command
                     return [
                         "product"             => $product->PRODUTO,
                         "quantity"            => $product->TOTAL_IMPRESSOES,
-
                         "description"         => $product->DESCRICAO_REDUZIDA,
                         "ean"                 =>  $product->EAN,
                         "max_price"           => $product->PRECO_MAXIMO,
@@ -81,7 +80,8 @@ class RecoverProducts extends Command
                         "expiration_date"     => $product->VALIDADE,
                         "X"                   => $product->LEVE,
                         "Y"                   => $product->PAGUE,
-                        'nameplate_label_printing' => $product->IMPRESSAO_ETIQUETA_PLACA
+                        'nameplate_label_printing' => $product->IMPRESSAO_ETIQUETA_PLACA,
+                        'family' => $product->FAMILIA_PRODUTO
                     ];
                 })->values()->toArray();
 
@@ -104,7 +104,7 @@ class RecoverProducts extends Command
                     if ($responseData['status'] === 'success') {
                         foreach ($responseData['pdfs'] ?? [['pdf' => $responseData['pdf']]] as $generatedPdf) {
                             $paths[] = [
-                                'path' =>  asset(' public/img/' . $generatedPdf['pdf']),
+                                'path' =>  asset('img/' . $generatedPdf['pdf']),
                                 'template_id' => $first->ID_TEMPLATE,
                                 'type' => $first->TIPO_TEMPLATE
                             ];

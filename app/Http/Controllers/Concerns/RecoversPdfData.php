@@ -70,7 +70,7 @@ trait RecoversPdfData
                 'F.DESCRICAO as FAMILIA_DESCRICAO',
             ])
             ->selectRaw("
-                                CASE
+                             ISNULL(CASE
                                     WHEN PROCFIT_TIPO = 'LEVEX_PAGUEY' THEN 'LEVE X E PAGUE Y'
                                     WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVE X E PAGUE Y'
                                     WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE X E PAGUE '
@@ -80,7 +80,7 @@ trait RecoversPdfData
                                     WHEN PROCFIT_TIPO = 'PRODUTOS_PV' THEN 'PRODUTOS PV'
                                     WHEN PROCFIT_TIPO = 'ETIQUETAS_GONDULA' THEN 'ETIQUETAS DE GONDULA'
                                     ELSE PROCFIT_TIPO
-                                END AS DESCRICAO_PROMOCAO
+                                END, 'ETIQUETAS REDUZIDAS') AS DESCRICAO_PROMOCAO
     ");
     }
 

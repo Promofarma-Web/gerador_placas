@@ -28,11 +28,5 @@ class CreateLog extends Controller
                 'message' => $th->getMessage()
             ]);
         }
-
-        /*   return response()->json([
-            'status' => 'success',
-            'data_execucao' => $request->data_execucao,
-            'comando_executado' => $request->comando_executado
-        ]);*/
     }
 }

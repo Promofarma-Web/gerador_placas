@@ -80,8 +80,6 @@ class GenerateImage extends Controller
                 }
             }
 
-
-
             $imageResponses = Http::pool(fn(Pool $pool) => collect($chunkPayloads)->map(
                 fn($payload) => $pool->acceptJson()->post(TemplateService::GENERATE_IMAGE_URL, [
                     'template_id'     => $request->template_id,
@@ -94,8 +92,8 @@ class GenerateImage extends Controller
                         'description'              => $payload['description'],
                         'barcode'                  => $payload['ean'],
                         'ean'                      => !empty($payload['ean']) ? "EAN: " . $payload['ean'] : "",
-                        'max_price'                => $payload['max_price'],
-                        'sail_price'               => $payload['sail_price'],
+                        'max_price'                => !empty($payload['max_price']) ? "De:  " . $payload['max_price'] :  "",
+                        'sail_price'               => !empty($payload['sail_price']) ? "Por: " . $payload['sail_price'] : "",
                         'promotion_price'          => $payload['promotion_price'],
                         'percentage_discount'      => $payload['percentage_discount'],
                         'initial_date'             => $payload['initial_date'],

@@ -92,7 +92,7 @@ class GenerateImage extends Controller
                         'description'              => $payload['description'],
                         'barcode'                  => $payload['ean'],
                         'ean'                      => !empty($payload['ean']) ? "EAN: " . $payload['ean'] : "",
-                        'max_price'                => $request->template_id == 88 ? "De: R$ " . $payload['max_price'] : $payload['max_price'],
+                        'max_price'                => $request->template_id == 88 ? "De: R$ " . $payload['max_price'] : "R$ " . $payload['max_price'],
                         'sail_price'               => !empty($payload['sail_price']) ? ($request->template_id == 88   ? "Por: R$ " . $payload['sail_price']  : "R$ " . $payload['sail_price']) : "",
                         'promotion_price'          => $payload['promotion_price'],
                         'percentage_discount'      => $payload['percentage_discount'],

@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
          $middleware->trustProxies(
-            at: ['localhost', '*.promofarma.int'],
+            at: ['localhost', 'notificacao.promofarma.int'],
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

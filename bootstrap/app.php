@@ -12,7 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+         $middleware->trustProxies(
+            at: ['localhost', '*.promofarma.int'],
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

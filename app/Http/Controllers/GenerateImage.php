@@ -10,6 +10,7 @@ use App\Models\TypePromotions;
 use App\Services\LabelService;
 use App\Services\PdfService;
 use App\Services\TemplateService;
+use App\Services\TinyService;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -225,6 +226,8 @@ class GenerateImage extends Controller
             $pdfPath = (new LabelService())->generate($images, 'print_' . $request->id);
         } elseif ($request->type == 2) {
             $pdfPath = (new PdfService())->generate($images, 'print_' . $request->id);
+        } elseif ($request->type == 3) {
+            $pdfPath = (new TinyService())->generate($images, 'print_' . $request->id);
         } else {
             return response()->json([
                 'status'  => 'error',

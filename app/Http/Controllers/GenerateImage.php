@@ -96,7 +96,7 @@ class GenerateImage extends Controller
                         'max_price'                => $request->template_id == 88 ? "De: R$ " . $payload['max_price'] : "R$ " . $payload['max_price'],
                         'sail_price'               => !empty($payload['sail_price']) ? ($request->template_id == 88   ? "Por: R$ " . $payload['sail_price']  : "R$ " . $payload['sail_price']) : "",
                         'promotion_price'          => $payload['promotion_price'],
-                        'percentage_discount'      => $payload['percentage_discount'],
+                        'percentage_discount'      => !empty($payload['percentage_discount']) ? $payload['percentage_discount'] : "",
                         'initial_date'             => $payload['initial_date'],
                         'final_date'               => $payload['final_date'],
                         'buy'                      => $payload['buy'],

@@ -1,0 +1,321 @@
+{
+	"info": {
+		"_postman_id": "c753bcaa-4f1c-4cdc-b5cf-a0ce410ee543",
+		"name": "Gerador de Placas API",
+		"description": "Collection gerada a partir de routes/api.php. Ajuste as variáveis da collection (base_url, store, template_id, product, etc.) antes de rodar os requests.\n\nAlguns endpoints (RequestGeneratorImage) dependem de dados já existentes no banco (ex.: id retornado por /generate-image), então rode os fluxos na ordem: login -> generate-image -> print -> recover*.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{ "key": "base_url", "value": "http://gerador-placas.promofarma.int/api", "type": "string" },
+		{ "key": "token", "value": "", "type": "string" },
+		{ "key": "username", "value": "", "type": "string" },
+		{ "key": "password", "value": "", "type": "string" },
+		{ "key": "store", "value": "1", "type": "string" },
+		{ "key": "template_id", "value": "89", "type": "string" },
+		{ "key": "product", "value": "1026810", "type": "string" },
+		{ "key": "familia", "value": "1", "type": "string" },
+		{ "key": "requisition_initial_date", "value": "2026-08-01", "type": "string" },
+		{ "key": "requisition_final_date", "value": "2026-08-31", "type": "string" },
+		{ "key": "requisicao_id", "value": "409", "type": "string" }
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"auth": { "type": "noauth" },
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('token', jsonData.token);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						},
+						"description": "Autentica e grava o token gerado em APP_TOKEN (.env). O test script salva o token retornado na variável de collection {{token}}, usada como Bearer nos demais requests."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Logs",
+			"item": [
+				{
+					"name": "Create Log",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data_execucao\": \"2026-08-31 10:00:00\",\n    \"comando_executado\": \"php artisan queue:work\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/create-log",
+							"host": ["{{base_url}}"],
+							"path": ["create-log"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Geração de Imagem / Impressão",
+			"item": [
+				{
+					"name": "Generate Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"template_id\": {{template_id}},\n    \"store\": {{store}},\n    \"type\": 2,\n    \"impression_date\": \"2026-08-31\",\n    \"payload\": [\n        {\n            \"product\": {{product}},\n            \"family\": {{familia}},\n            \"quantity\": 1,\n            \"description\": \"Produto de teste\",\n            \"ean\": \"7891234567890\",\n            \"max_price\": 19.90,\n            \"sail_price\": 17.90,\n            \"promotion_price\": 15.90,\n            \"percentage_discount\": 20,\n            \"initial_date\": \"2026-08-01\",\n            \"final_date\": \"2026-08-31\",\n            \"buy\": null,\n            \"get\": null,\n            \"promotion_title\": null,\n            \"expiration_date\": null,\n            \"X\": 0,\n            \"Y\": 0,\n            \"nameplate_label_printing\": null\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/generate-image",
+							"host": ["{{base_url}}"],
+							"path": ["generate-image"]
+						},
+						"description": "Cria a requisição (REQUISICOES_GERADOR_PLACAS / _PRODUTOS), chama o serviço de geração de imagem para cada item do payload e já dispara o /print internamente. Retorna 'pdf' e 'pdfs' com o(s) arquivo(s) gerado(s)."
+					},
+					"response": []
+				},
+				{
+					"name": "Print",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": {{requisicao_id}},\n    \"type\": 2,\n    \"imageBase64\": [\n        \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/print?produto={{product}}",
+							"host": ["{{base_url}}"],
+							"path": ["print"],
+							"query": [
+								{ "key": "produto", "value": "{{product}}", "description": "Opcional: filtra os produtos da requisição." }
+							]
+						},
+						"description": "'id' é o REQUISICAO_GERADOR_PLACAS retornado em products[].id pelo /generate-image (não o payload de resposta inteiro). type=1 gera etiqueta (LabelService), type=2 gera placa (PdfService). imageBase64 deve ser um array de strings base64, uma por imagem/cópia."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recover",
+			"item": [
+				{
+					"name": "Recover Familias",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverFamilias?store={{store}}&requisition_initial_date={{requisition_initial_date}}&requisition_final_date={{requisition_final_date}}&template={{template_id}}&product={{product}}&familia={{familia}}",
+							"host": ["{{base_url}}"],
+							"path": ["recoverFamilias"],
+							"query": [
+								{ "key": "store", "value": "{{store}}" },
+								{ "key": "requisition_initial_date", "value": "{{requisition_initial_date}}" },
+								{ "key": "requisition_final_date", "value": "{{requisition_final_date}}" },
+								{ "key": "template", "value": "{{template_id}}", "description": "opcional" },
+								{ "key": "product", "value": "{{product}}", "description": "opcional" },
+								{ "key": "familia", "value": "{{familia}}", "description": "opcional" },
+								{ "key": "promotion", "value": "", "description": "opcional", "disabled": true }
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recover All Familias",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverAllFamilias",
+							"host": ["{{base_url}}"],
+							"path": ["recoverAllFamilias"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Pdf",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverPdf?store={{store}}&requisition_initial_date={{requisition_initial_date}}&requisition_final_date={{requisition_final_date}}&template={{template_id}}&product={{product}}&familia={{familia}}",
+							"host": ["{{base_url}}"],
+							"path": ["recoverPdf"],
+							"query": [
+								{ "key": "store", "value": "{{store}}" },
+								{ "key": "requisition_initial_date", "value": "{{requisition_initial_date}}" },
+								{ "key": "requisition_final_date", "value": "{{requisition_final_date}}" },
+								{ "key": "template", "value": "{{template_id}}", "description": "opcional" },
+								{ "key": "product", "value": "{{product}}", "description": "opcional" },
+								{ "key": "familia", "value": "{{familia}}", "description": "opcional" },
+								{ "key": "promotion", "value": "", "description": "opcional", "disabled": true }
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Pdf By Store",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverPdfByStore?store={{store}}&template={{template_id}}&produto={{product}}&familia={{familia}}",
+							"host": ["{{base_url}}"],
+							"path": ["recoverPdfByStore"],
+							"query": [
+								{ "key": "store", "value": "{{store}}", "description": "obrigatório" },
+								{ "key": "template", "value": "{{template_id}}", "description": "opcional" },
+								{ "key": "produto", "value": "{{product}}", "description": "opcional" },
+								{ "key": "familia", "value": "{{familia}}", "description": "opcional" }
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Pdf Template",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverPdfTemplate?store={{store}}&requisition_initial_date={{requisition_initial_date}}&requisition_final_date={{requisition_final_date}}&template={{template_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["recoverPdfTemplate"],
+							"query": [
+								{ "key": "store", "value": "{{store}}" },
+								{ "key": "requisition_initial_date", "value": "{{requisition_initial_date}}" },
+								{ "key": "requisition_final_date", "value": "{{requisition_final_date}}" },
+								{ "key": "template", "value": "{{template_id}}", "description": "opcional" },
+								{ "key": "product", "value": "{{product}}", "description": "opcional", "disabled": true },
+								{ "key": "familia", "value": "{{familia}}", "description": "opcional", "disabled": true },
+								{ "key": "promotion", "value": "", "description": "opcional", "disabled": true }
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Promotions",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverPromotions",
+							"host": ["{{base_url}}"],
+							"path": ["recoverPromotions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Templates",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverTemplates?state=1&title=",
+							"host": ["{{base_url}}"],
+							"path": ["recoverTemplates"],
+							"query": [
+								{ "key": "state", "value": "1", "description": "opcional" },
+								{ "key": "title", "value": "", "description": "opcional (busca LIKE)" }
+							]
+						},
+						"description": "Retorna apenas templates com TEMPLATE_ID em [87..96]."
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Templates Products",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverTemplatesProducts?loja={{store}}&produto={{product}}&familia={{familia}}&promocao=",
+							"host": ["{{base_url}}"],
+							"path": ["recoverTemplatesProducts"],
+							"query": [
+								{ "key": "loja", "value": "{{store}}", "description": "obrigatório" },
+								{ "key": "produto", "value": "{{product}}", "description": "opcional" },
+								{ "key": "familia", "value": "{{familia}}", "description": "opcional" },
+								{ "key": "promocao", "value": "", "description": "opcional" }
+							]
+						},
+						"description": "Executa a stored procedure USP_PROMOCOES_CONSULTA_PRODUTO no SQL Server (conexão 'sqlsrv')."
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Type Page",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{base_url}}/recoverTypePage?loja={{store}}",
+							"host": ["{{base_url}}"],
+							"path": ["recoverTypePage"],
+							"query": [
+								{ "key": "loja", "value": "{{store}}", "description": "obrigatório" }
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

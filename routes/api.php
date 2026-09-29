@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CreateLog;
 use App\Http\Controllers\GenerateImage;
 use App\Http\Controllers\RecoverAllFamilias;
 use App\Http\Controllers\RecoverFamilias;
 use App\Http\Controllers\RecoverPdf;
 use App\Http\Controllers\RecoverPdfByStore;
 use App\Http\Controllers\RecoverPdfTemplate;
-use App\Http\Controllers\CreateLog;
 use App\Http\Controllers\RecoverPromotions;
 use App\Http\Controllers\RecoverTemplates;
 use App\Http\Controllers\RecoverTemplatesProducts;

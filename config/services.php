@@ -37,4 +37,8 @@ return [
     'template_placas' => [
         'url' => env('TEMPLATE_PLACAS_URL', 'http://templates_promocionais:80/templates-promocionais/public'),
     ],
+
+    'notification' => [
+        'url' => env('NOTIFICATION_URL', 'http://notificacao_http:80/api/v1'),
+    ],
 ];

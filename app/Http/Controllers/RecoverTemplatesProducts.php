@@ -19,7 +19,6 @@ class RecoverTemplatesProducts extends Controller
         ]);
 
 
-
         $result = DB::connection('sqlsrv')->select(
             'EXEC USP_PROMOCOES_CONSULTA_PRODUTO @PRODUTO = ?, @EMPRESA = ?, @PROMOCAO = ?, @FAMILIA = ?',
             [

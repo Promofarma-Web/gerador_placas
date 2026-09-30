@@ -12,8 +12,13 @@ final class SavePath
 
     public function handle(PaperGenerated $event): void
     {
-        $resolved = array_map(fn (string $path): array => ['CAMINHO' => $path], $event->paths);
+        $resolved = array_map(fn(string $path): array => ['CAMINHO' => $path], $event->paths);
 
         $event->logger->paths()->createMany($resolved);
+
+
+        if ($event->paths !== []) {
+            $event->logger->update(['PATH_PDF' => public_path('img/' . $event->paths[0])]);
+        }
     }
 }

@@ -54,31 +54,37 @@ class DailyProducts extends Model
         return self::query()
             ->select(
                 DB::RAW("CASE
-                            WHEN PROCFIT_TIPO = 'LEVEX_PAGUEY' THEN 'LEVEX_PAGUEY'
-                            WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVEX_PAGUEY'
-                            WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE_PAGUE'
-                            WHEN PROCFIT_TIPO = 'TABELAS_ENCARTES_TABLOIDE' THEN 'ENCARTES'
-                            WHEN PROCFIT_TIPO = 'PROMOCOES_AGRUPAMENTOS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVEX_PAGUEY'
-                            WHEN PROCFIT_TIPO = 'PROMOCOES_AGRUPAMENTOS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE_PAGUE'
-                            WHEN PROCFIT_TIPO = 'PRODUTOS_PV' THEN 'PV'
-                            WHEN PROCFIT_TIPO = 'ETIQUETAS_GONDULA' THEN 'ETIQUETAS_GONDULA'
-                            ELSE PROCFIT_TIPO
-                        END AS PROCFIT_TIPO"),
-                DB::RAW(" CASE
-                                    WHEN PROCFIT_TIPO = 'LEVEX_PAGUEY' THEN 'LEVE X E PAGUE Y'
-                                    WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVE X E PAGUE Y'
-                                    WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE X E PAGUE '
-                                    WHEN PROCFIT_TIPO = 'TABELAS_ENCARTES_TABLOIDE' THEN 'ENCARTES'
-                                    WHEN PROCFIT_TIPO = 'PROMOCOES_AGRUPAMENTOS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVE X E PAGUE Y'
-                                    WHEN PROCFIT_TIPO = 'PROMOCOES_AGRUPAMENTOS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE X E PAGUE '
-                                    WHEN PROCFIT_TIPO = 'PRODUTOS_PV' THEN 'PRODUTOS PV'
-                                    WHEN PROCFIT_TIPO = 'ETIQUETAS_GONDULA' THEN 'ETIQUETAS DE GONDULA'
-                                    ELSE PROCFIT_TIPO
-                                END AS PROCFIT_TIPO_DESCRICAO"),
+                        WHEN PROCFIT_TIPO = 'LEVEX_PAGUEY' THEN 'LEVEX_PAGUEY'
+                        WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVEX_PAGUEY'
+                        WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE_PAGUE'
+                        WHEN PROCFIT_TIPO = 'TABELAS_ENCARTES_TABLOIDE' THEN 'ENCARTES'
+                        WHEN PROCFIT_TIPO = 'PROMOCOES_AGRUPAMENTOS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVEX_PAGUEY'
+                        WHEN PROCFIT_TIPO = 'PROMOCOES_AGRUPAMENTOS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE_PAGUE'
+                        WHEN PROCFIT_TIPO = 'PRODUTOS_PV' THEN 'PV'
+                        WHEN PROCFIT_TIPO = 'ETIQUETAS_GONDULA' THEN 'ETIQUETAS_GONDULA'
+                        ELSE PROCFIT_TIPO
+                    END AS PROCFIT_TIPO"),
+
+                DB::RAW("CASE
+                        WHEN PROCFIT_TIPO = 'LEVEX_PAGUEY' THEN 'LEVE X E PAGUE Y'
+                        WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVE X E PAGUE Y'
+                        WHEN PROCFIT_TIPO = 'PROMOCOES_FLEXIVEIS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE X E PAGUE'
+                        WHEN PROCFIT_TIPO = 'TABELAS_ENCARTES_TABLOIDE' THEN 'ENCARTES'
+                        WHEN PROCFIT_TIPO = 'PROMOCOES_AGRUPAMENTOS' AND PRECO_PROMOCAO = 0.00 THEN 'LEVE X E PAGUE Y'
+                        WHEN PROCFIT_TIPO = 'PROMOCOES_AGRUPAMENTOS' AND PRECO_PROMOCAO <> 0.00 THEN 'LEVE X E PAGUE'
+                        WHEN PROCFIT_TIPO = 'PRODUTOS_PV' THEN 'PRODUTOS PV'
+                        WHEN PROCFIT_TIPO = 'ETIQUETAS_GONDULA' THEN 'ETIQUETAS DE GONDULA'
+                        ELSE PROCFIT_TIPO
+                    END AS PROCFIT_TIPO_DESCRICAO"),
+
                 'TIPO_FOLHA',
                 'COR_PLANO_FUNDO',
             )
             ->where('LOJA', $loja)
+            ->whereNotNull('DATA_INICIAL')
+            ->whereNotNull('DATA_FINAL')
+            ->whereRaw('DATA_INICIAL < CAST(GETDATE() AS DATE)')
+            ->whereRaw('DATA_FINAL > CAST(GETDATE() AS DATE)')
             ->distinct()
             ->get();
     }

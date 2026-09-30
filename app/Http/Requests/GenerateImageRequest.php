@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Dto\Payload;
+use App\Enums\Type;
+// use App\Models\FamiliaProduto;
+// use App\Models\Products;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class GenerateImageRequest extends FormRequest
+{
+    // Autoriza a requisação antes de fechar no controller
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    // Valido meu payload de forma completa
+    public function rules(): array
+    {
+        return [
+            'template_id' => ['required', 'integer'],
+            'store' => ['required', 'integer', 'min:1', 'max:100'],
+            'type' => ['required', 'integer', Rule::enum(Type::class)],
+            'impression_date' => ['nullable', 'date', 'date_format:Y-m-d'],
+            'payload' => ['required', 'array', 'min:1'],
+            'payload.*.product' => ['required', 'integer'],
+            'payload.*.family' => ['required', 'integer'],
+            'payload.*.quantity' => ['required', 'integer', 'min:1'],
+            'payload.*.description' => ['required', 'string', 'max:255'],
+            'payload.*.ean' => ['required', 'string', 'max:14'],
+            'payload.*.max_price' => ['required', 'numeric'],
+            'payload.*.sail_price' => ['required', 'numeric'],
+            'payload.*.promotion_price' => ['required', 'numeric'],
+            'payload.*.percentage_discount' => ['nullable', 'numeric'],
+            'payload.*.initial_date' => ['nullable', 'string'],
+            'payload.*.final_date' => ['nullable', 'string'],
+            'payload.*.buy' => ['nullable', 'string'],
+            'payload.*.get' => ['nullable', 'string'],
+            'payload.*.promotion_title' => ['nullable', 'string'],
+            'payload.*.expiration_date' => ['nullable', 'string'],
+            'payload.*.x' => ['nullable', 'string'],
+            'payload.*.y' => ['nullable', 'string'],
+            'payload.*.nameplate_label_printing' => ['nullable', 'string'],
+        ];
+    }
+
+    public function toData(): Payload
+    {
+        return Payload::fromArray($this->validated());
+    }
+}

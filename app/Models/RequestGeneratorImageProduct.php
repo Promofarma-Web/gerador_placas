@@ -7,21 +7,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RequestGeneratorImageProduct extends Model
 {
-    protected $connection  = 'sqlsrv_secondary';
+    protected $connection = 'sqlsrv_secondary';
 
     protected $table = 'REQUISICOES_GERADOR_PLACAS_PRODUTOS';
 
     protected $primaryKey = 'REQUISICAO_GERADOR_PLACAS_IMAGEM';
 
-
     protected $fillable = [
         'REQUISICAO_GERADOR_PLACAS',
         'PRODUTO',
         'FAMILIA',
-        'ETIQUETA_PLACAS_RESULTADO_ID'
-
+        'ETIQUETA_PLACAS_RESULTADO_ID',
     ];
-
 
     public $timestamps = false;
 
@@ -35,10 +32,10 @@ class RequestGeneratorImageProduct extends Model
         return static::where('PRODUTO', $data['PRODUTO'])
             ->whereHas(
                 'tableMaster',
-                fn($q) => $q
+                fn ($q) => $q
                     ->where('TEMPLATE_ID', $data['TEMPLATE_ID'])
                     ->where('LOJA', $data['LOJA'])
-                    ->where('DATA_REQUISICAO', $data['DATA_REQUISICAO'])
+                    ->where('DATA_REQUISICAO', $data['DATA_REQUISICAO']),
             )
             ->exists();
     }

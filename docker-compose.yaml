@@ -1,3 +1,8 @@
+networks:
+  default:
+  templates-promocionais_templates-promocionais_network:
+    external: true
+
 services:
   gerador_placas_php:
     container_name: gerador_placas_php
@@ -6,6 +11,9 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./:/var/www/html/
+    networks:
+      - default
+      - templates-promocionais_templates-promocionais_network
 
   gerador_placas_http:
     container_name: gerador_placas_http

@@ -21,6 +21,8 @@ final class GenerateImage extends Controller
     {
         $payload = $request->toData();
 
+
+
         try {
             $logger = $this->logger->handle($payload);
 
@@ -35,6 +37,7 @@ final class GenerateImage extends Controller
                 'pdfs' => $results,
             ]);
         } catch (Throwable $e) {
+
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),

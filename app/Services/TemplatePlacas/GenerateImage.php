@@ -17,6 +17,7 @@ final class GenerateImage
 
         /** @var \App\Dto\PayloadProduct $product */
         foreach ($payload->payloads as $index => $product) {
+
             $response = Http::baseUrl(config('services.template_placas.url'))
                 ->acceptJson()
                 ->post('/generate-image-product', [
@@ -24,8 +25,12 @@ final class GenerateImage
                     'payload' => $product->toArray(),
                 ]);
 
-            if ($response->failed() || $response->json('image') === null) {
-                throw new RuntimeException('Invalid response for api');
+            if ($response->failed() || $response->json('status') !== 'success' || $response->json('image') === null) {
+                throw new RuntimeException(sprintf(
+                    'Invalid response for api [%d]: %s',
+                    $response->status(),
+                    $response->json('image') ?? $response->json('message') ?? mb_substr($response->body(), 0, 300),
+                ));
             }
 
             if (! isset($results[$product->product])) {
@@ -37,6 +42,6 @@ final class GenerateImage
             ]));
         }
 
-        return collect($results)->collapse()->map(fn (array $result): string => $result['enconde']);
+        return collect($results)->collapse()->map(fn(array $result): string => $result['enconde']);
     }
 }

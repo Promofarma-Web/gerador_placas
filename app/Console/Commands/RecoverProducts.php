@@ -2,15 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\ColorRules;
-use App\Http\Controllers\GenerateImage;
+use App\Dto\Payload;
 use App\Models\DailyProducts;
 use App\Models\Logs;
 use App\Services\Generetor\BatchLabelGenerator;
-use App\Services\Notification\SendNotification;
+use App\Services\RequestLogger\RequestLogger;
 use Illuminate\Console\Command;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class RecoverProducts extends Command
 {
@@ -28,9 +25,9 @@ class RecoverProducts extends Command
      */
     protected $description = 'Command description';
 
-    public function handle(BatchLabelGenerator $generator)
+    public function handle(BatchLabelGenerator $generator, RequestLogger $requestLogger)
     {
-        $products = DailyProducts::getDailyProducts($this->argument('loja'));
+        $products = DailyProducts::getDailyProducts($this->option('loja'));
 
         if ($products->isEmpty()) {
             $this->error('Nenhum produto encontrado');
@@ -40,10 +37,9 @@ class RecoverProducts extends Command
         $byStore = $products->groupBy('loja');
 
         foreach ($byStore as $loja => $storeProducts) {
-            $this->info("Processando loja: {$loja} - ".now()->format('d/m/Y H:i:s'));
-            $paths = [];
+            $this->info("Processando loja: {$loja} - " . now()->format('d/m/Y H:i:s'));
             $grouped = $storeProducts->groupBy(function ($product) {
-                return $product->ID_TEMPLATE.'_'.$product->loja;
+                return $product->ID_TEMPLATE . '_' . $product->loja;
             });
 
             foreach ($grouped as $group) {
@@ -65,9 +61,9 @@ class RecoverProducts extends Command
                             'get' => $product->PAGUE,
                             'promotion_title' => $product->TITULO_PROMOCAO_2,
                             'expiration_date' => $product->VALIDADE,
-                            'X' => $product->LEVE,
-                            'Y' => $product->PAGUE,
-                            'nameplate_label_printing' => $product->IMPRESSAO_ETIQUETA_PLACA,
+                            'x' => $product->LEVE,
+                            'y' => $product->PAGUE,
+                            'nameplate_label_printing' => $product->ID,
                             'family' => $product->FAMILIA_PRODUTO,
                         ];
                     })
@@ -75,45 +71,34 @@ class RecoverProducts extends Command
                     ->toArray();
 
                 try {
-                    $request = new Request([
-                        'template_id' => $first->ID_TEMPLATE,
-                        'store' => $first->loja,
+                    $data = [
+                        'template_id' => (int) $first->ID_TEMPLATE,
+                        'store' => (int) $first->loja,
                         'impression_date' => now()->format('d/m/Y'),
-                        'type' => $first->TIPO_TEMPLATE,
+                        'type' => (int) $first->TIPO_TEMPLATE,
                         'payload' => $payload,
+                    ];
+
+                    $dto = Payload::fromArray($data);
+                    $logger = $requestLogger->handle($dto);
+
+                    /** Os listeners de PaperGenerated salvam os caminhos e notificam a loja */
+                    $generator->handle($logger, $dto);
+
+                    $ids = $group->pluck('ID')->implode(', ');
+                    Logs::create([
+                        'DATA_EXECUCAO' => now()->format('d-m-Y'),
+                        'COMANDO_EXECUTADO' => json_encode(
+                            array_merge(['IDS' => $ids], $data),
+                            JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT,
+                        ),
                     ]);
-
-                    $response = $generator->handle();
-                    $responseData = json_decode($response->getContent(), true);
-
-                    if ($responseData['status'] === 'success') {
-                        foreach ($responseData['pdfs'] ?? [['pdf' => $responseData['pdf']]] as $generatedPdf) {
-                            $paths[] = [
-                                'path' => asset('img/'.$generatedPdf['pdf']),
-                                'template_id' => $first->ID_TEMPLATE,
-                                'type' => $first->TIPO_TEMPLATE,
-                            ];
-                        }
-
-                        $this->sendNotification($first->loja, $paths);
-
-                        $paths = [];
-
-                        $ids = $group->pluck('ID')->implode(', ');
-                        Logs::create([
-                            'DATA_EXECUCAO' => now()->format('d-m-Y'),
-                            'COMANDO_EXECUTADO' => json_encode(
-                                array_merge(['IDS' => $ids], $request->all()),
-                                JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT,
-                            ),
-                        ]);
-                        $this->info(
-                            "Template {$first->ID_TEMPLATE} | Loja {$first->loja} gerado com sucesso."
-                                .now()->format('d/m/Y H:i:s'),
-                        );
-                    }
+                    $this->info(
+                        "Template {$first->ID_TEMPLATE} | Loja {$first->loja} gerado com sucesso. "
+                            . now()->format('d/m/Y H:i:s'),
+                    );
                 } catch (\Throwable $th) {
-                    $this->error("Erro no template {$first->ID_TEMPLATE} | Loja {$first->loja}: ".$th->getMessage());
+                    $this->error("Erro no template {$first->ID_TEMPLATE} | Loja {$first->loja}: " . $th->getMessage());
                     continue;
                 }
             }

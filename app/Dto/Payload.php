@@ -14,18 +14,20 @@ final readonly class Payload
         public int $templateId,
         public int $store,
         public Type $type,
-        public ?CarbonImmutable $impressionDate,
+        public ?string $impressionDate,
         public array $payloads,
     ) {}
 
     public static function fromArray(array $data): self
     {
+
+
         return new self(
             templateId: (int) $data['template_id'],
             store: (int) $data['store'],
             type: Type::from($data['type']),
-            impressionDate: $data['impression_date'] ? CarbonImmutable::parse($data['impression_date']) : null,
-            payloads: array_map(fn (array $payload): PayloadProduct => PayloadProduct::fromArray(
+            impressionDate: $data['impression_date'] ? $data['impression_date'] : null,
+            payloads: array_map(fn(array $payload): PayloadProduct => PayloadProduct::fromArray(
                 $payload,
             ), $data['payload']),
         );
@@ -55,6 +57,6 @@ final readonly class Payload
 
     private function resolveImpressionLabel(): ?string
     {
-        return filled($this->impressionDate) ? "Impresso em: {$this->impressionDate->format('d/m/Y')}" : null;
+        return filled($this->impressionDate) ? "{$this->impressionDate}" : null;
     }
 }

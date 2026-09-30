@@ -21,6 +21,8 @@ final class BatchLabelGenerator
 
     public function handle(RequestGeneratorImage $logger, Payload $payload): array
     {
+
+
         /** Print resolve via factory qual é tipo de papel será gerado */
         $print = PaperFactory::make($payload->type);
 
@@ -30,7 +32,7 @@ final class BatchLabelGenerator
         /** Faz nivelamento do array de produtos e quebra em 25 (50 items são 2 arrays com 25 produtos cada) */
         $paths = $results
             ->chunk(self::PER_PAPER)
-            ->map(fn (Collection $items, int $key): string => $print->generate($items->toArray(), sprintf(
+            ->map(fn(Collection $items, int $key): string => $print->generate($items->toArray(), sprintf(
                 'print-%d-%d',
                 $key + 1,
                 $logger->getKey(),

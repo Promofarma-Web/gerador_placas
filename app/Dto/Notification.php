@@ -23,8 +23,8 @@ final readonly class Notification
             title: "Precificação - Loja {$logger->LOJA}",
             content: $content,
             categoryId: 13,
-            userId: 13,
-            recipientIds: [1], //[$logger->LOJA],
+            userId: 2,
+            recipientIds: [$logger->LOJA], //[$logger->LOJA],
         );
     }
 

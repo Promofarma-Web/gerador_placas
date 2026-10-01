@@ -19,7 +19,8 @@ final class BatchLabelGenerator
         public GenerateImage $image,
     ) {}
 
-    public function handle(RequestGeneratorImage $logger, Payload $payload): array
+    //  public function handle(RequestGeneratorImage $logger, Payload $payload): array
+    public function handle(Payload $payload): array
     {
 
 

@@ -20,7 +20,7 @@ final class BatchLabelGenerator
     ) {}
 
     //
-    public function handle(RequestGeneratorImage $logger, Payload $payload): array
+    public function handle(RequestGeneratorImage $logger, Payload $payload, bool $isSend = false): array
     {
 
 
@@ -48,7 +48,8 @@ final class BatchLabelGenerator
             ))
             ->toArray();
 
-        event(new PaperGenerated($logger, $paths));
+
+        PaperGenerated::dispatchIf($isSend, $logger, $paths);
 
         return $paths;
     }

@@ -31,13 +31,21 @@ final class BatchLabelGenerator
         $results = $this->image->handle($payload);
 
         /** Faz nivelamento do array de produtos e quebra em 25 (50 items são 2 arrays com 25 produtos cada) */
-        $paths = $results
-            ->chunk(self::PER_PAPER)
-            ->map(fn(Collection $items, int $key): string => $print->generate($items->toArray(), sprintf(
-                'print-%d-%d',
-                $key + 1,
-                $logger->getKey(),
-            )))
+        $chunks = $results->chunk(self::PER_PAPER);
+
+        /** Nome do pdf: print-data-loja-tipo_etiqueta (com sufixo -N quando houver mais de um pdf) */
+        $filename = sprintf(
+            'print-%s-%d-%s',
+            now()->format('d-m-Y'),
+            $payload->store,
+            strtolower($payload->type->name),
+        );
+
+        $paths = $chunks
+            ->map(fn(Collection $items, int $key): string => $print->generate(
+                $items->toArray(),
+                $chunks->count() > 1 ? sprintf('%s-%d', $filename, $key + 1) : $filename,
+            ))
             ->toArray();
 
         event(new PaperGenerated($logger, $paths));

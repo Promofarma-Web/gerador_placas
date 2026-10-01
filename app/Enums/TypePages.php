@@ -28,4 +28,30 @@ enum TypePages: string
             self::ETIQUETAS_GONDULA => 'Etiquetas de Gondula',
         };
     }
+
+    /** Descrição da promoção a partir do PROCFIT_TIPO (substitui o CASE do SQL) */
+    public static function descricaoPromocao(?string $procfitTipo, $precoPromocao): string
+    {
+        if ($procfitTipo === null) {
+            return 'ETIQUETAS REDUZIDAS';
+        }
+
+        $tipo = self::tryFrom($procfitTipo);
+
+        if (in_array($tipo, [self::PROMOCOES_FLEXIVEIS, self::PROMOCOES_AGRUPAMENTOS], true)) {
+            if ($precoPromocao === null) {
+                return $procfitTipo;
+            }
+
+            return (float) $precoPromocao == 0 ? 'LEVE X E PAGUE Y' : 'LEVE X E PAGUE ';
+        }
+
+        return match ($tipo) {
+            self::LEVEX_PAGUEY => 'LEVE X E PAGUE Y',
+            self::TABELAS_ENCARTES_TABLOIDE => 'ENCARTES',
+            self::PRODUTOS_PV => 'PRODUTOS PV',
+            self::ETIQUETAS_GONDULA => 'ETIQUETAS DE GONDULA',
+            default => $procfitTipo,
+        };
+    }
 }

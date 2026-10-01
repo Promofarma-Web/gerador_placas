@@ -55,6 +55,8 @@ class TypePages
                 unset($item->PRECO_PROMOCAO);
 
                 return $item;
-            });
+            })
+            ->unique(fn ($item) => $item->PROCFIT_TIPO . '|' . $item->TIPO_FOLHA . '|' . $item->COR_PLANO_FUNDO)
+            ->values();
     }
 }

@@ -83,8 +83,8 @@ class DailyProducts extends Model
             ->where('LOJA', $loja)
             ->whereNotNull('DATA_INICIAL')
             ->whereNotNull('DATA_FINAL')
-            ->whereRaw('DATA_INICIAL < CAST(GETDATE() AS DATE)')
-            ->whereRaw('DATA_FINAL > CAST(GETDATE() AS DATE)')
+            ->whereRaw('DATA_INICIAL <= CAST(GETDATE() AS DATE)')
+            ->whereRaw('DATA_FINAL >= CAST(GETDATE() AS DATE)')
             ->distinct()
             ->get();
     }

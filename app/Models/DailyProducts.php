@@ -30,7 +30,6 @@ class DailyProducts extends Model
             ->whereNotNull('LOJA')
             ->whereNotIn('ID', $idsGerados)
             ->where('loja', $loja)
-            ->distinct()
             ->get()
             ->map(function ($item) {
                 $item->TIPO_TEMPLATE = in_array($item->ID_TEMPLATE, [95, 94, 93, 92, 91]) ? 1 : 2;

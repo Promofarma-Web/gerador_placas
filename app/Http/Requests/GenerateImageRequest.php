@@ -4,8 +4,7 @@ namespace App\Http\Requests;
 
 use App\Dto\Payload;
 use App\Enums\Type;
-// use App\Models\FamiliaProduto;
-// use App\Models\Products;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

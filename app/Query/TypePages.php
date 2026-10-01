@@ -17,10 +17,15 @@ class TypePages
                 'COR_PLANO_FUNDO',
             ])
             ->where('LOJA', $loja)
-            ->whereNotNull('DATA_INICIAL')
-            ->whereNotNull('DATA_FINAL')
-            ->whereDate('DATA_INICIAL', '<=', today())
-            ->whereDate('DATA_FINAL', '>=', today())
+            ->where(function ($query) {
+                $query->where('PROCFIT_TIPO', TypePagesEnum::ETIQUETAS_GONDULA->value)
+                    ->orWhere(function ($query) {
+                        $query->whereNotNull('DATA_INICIAL')
+                            ->whereNotNull('DATA_FINAL')
+                            ->whereDate('DATA_INICIAL', '<=', today())
+                            ->whereDate('DATA_FINAL', '>=', today());
+                    });
+            })
             ->distinct()
             ->get()
             ->map(function ($item) {

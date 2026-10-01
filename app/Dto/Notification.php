@@ -24,7 +24,7 @@ final readonly class Notification
             content: $content,
             categoryId: 13,
             userId: 13,
-            recipientIds: [$logger->LOJA],
+            recipientIds: [1], //[$logger->LOJA],
         );
     }
 

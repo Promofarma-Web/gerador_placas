@@ -52,8 +52,8 @@ class RecoverProducts extends Command
                             'description' => $product->DESCRICAO_REDUZIDA,
                             'ean' => $product->EAN,
                             'max_price' => $product->PRECO_MAXIMO,
-                            'sail_price' => $product->PRECO_MAXIMO,
-                            'promotion_price' => $product->PRECO_PROMOCAO,
+                            'sail_price' => $product->PRECO_VENDA ? $product->PRECO_VENDA : $product->PRECO_MAXIMO,
+                            'promotion_price' => $product->PRECO_PROMOCAO ? $product->PRECO_PROMOCAO : $product->PRECO_VENDA,
                             'percentage_discount' => $product->SUBTITULO_1,
                             'initial_date' => $product->DATA_INICIAL,
                             'final_date' => $product->DATA_FINAL,
@@ -83,7 +83,8 @@ class RecoverProducts extends Command
                     $logger = $requestLogger->handle($dto);
 
                     /** Os listeners de PaperGenerated salvam os caminhos e notificam a loja */
-                    $generator->handle($logger, $dto);
+
+                    $generator->handle($logger, $dto, true);
 
                     $ids = $group->pluck('ID')->implode(', ');
                     Logs::create([

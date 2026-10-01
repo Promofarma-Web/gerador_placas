@@ -24,10 +24,9 @@ final class GenerateImage extends Controller
 
 
         try {
-            //  $logger = $this->logger->handle($payload);
-            //$results = $this->batch->handle($logger, $payload);
-            $results = $this->batch->handle($payload);
+            $logger = $this->logger->handle($payload);
 
+            $results = $this->batch->handle($logger, $payload);
 
             return response()->json([
                 'status' => 'success',

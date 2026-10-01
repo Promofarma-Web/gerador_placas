@@ -21,7 +21,11 @@ class DailyProductsQuery
             ->where('loja', $loja)
             ->get()
             ->map(function ($item) {
-                $item->TIPO_TEMPLATE = in_array($item->ID_TEMPLATE, [95, 94, 93, 92, 91]) ? 1 : 2;
+                $item->TIPO_TEMPLATE = match (true) {
+                    in_array((int) $item->ID_TEMPLATE, [91, 92, 93]) => 1,
+                    in_array((int) $item->ID_TEMPLATE, [94, 95]) => 3,
+                    default => 2,
+                };
 
                 if ((float) $item->PRECO_PROMOCAO == 0) {
                     $item->PRECO_PROMOCAO = (string) $item->SUBTITULO_2;

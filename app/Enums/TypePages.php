@@ -29,6 +29,24 @@ enum TypePages: string
         };
     }
 
+    /** Texto da coluna "Tipo" na notificação enviada à loja, a partir do PROCFIT_TIPO */
+    public static function notificacao(?string $procfitTipo): ?string
+    {
+        if ($procfitTipo === null) {
+            return null;
+        }
+
+        return match ($procfitTipo) {
+            self::ETIQUETAS_GONDULA->value => 'Alterações de Preço',
+            self::TABELAS_ENCARTES_TABLOIDE->value => 'De/Por',
+            'PROMOCLUBE' => 'PromoClube',
+            self::PROMOCOES_AGRUPAMENTOS->value => 'Desconto % na Segunda Unidade',
+            self::LEVEX_PAGUEY->value => 'Leve X Pague Y',
+            self::PROMOCOES_FLEXIVEIS->value => 'Leve e Pague',
+            default => self::tryFrom($procfitTipo)?->descricao() ?? $procfitTipo,
+        };
+    }
+
     /** Descrição da promoção a partir do PROCFIT_TIPO (substitui o CASE do SQL) */
     public static function descricaoPromocao(?string $procfitTipo, $precoPromocao): string
     {

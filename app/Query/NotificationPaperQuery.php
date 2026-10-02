@@ -31,11 +31,11 @@ class NotificationPaperQuery
             ->distinct()
             ->get()
             ->map(fn ($item) => [
-                'tipo_folha' => $item->TIPO_FOLHA,
+                'tipo_folha' => PaperColorEnum::paperFrom($item->COR_PLANO_FUNDO) ?? $item->TIPO_FOLHA,
                 'cor' => '#' . $item->COR_PLANO_FUNDO,
                 'cor_nome' => PaperColorEnum::labelFrom($item->COR_PLANO_FUNDO),
                 'promocao' => TypePagesEnum::descricaoPromocao($item->PROCFIT_TIPO, $item->PRECO_PROMOCAO),
-                'tipo' => $item->PROCFIT_TIPO ? (TypePagesEnum::tryFrom($item->PROCFIT_TIPO)?->descricao() ?? $item->PROCFIT_TIPO) : null,
+                'tipo' => TypePagesEnum::notificacao($item->PROCFIT_TIPO),
             ])
             ->unique(fn ($item) => $item['tipo_folha'] . '|' . $item['cor'] . '|' . $item['tipo'])
             ->values();

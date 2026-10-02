@@ -39,7 +39,7 @@ class RecoverProducts extends Command
 
         $perPaper = $quantity !== null ? (int) $quantity : null;
 
-        $products = DailyProducts::getDailyProducts($this->option('loja'))->take(75);
+        $products = DailyProducts::getDailyProducts($this->option('loja'));
 
         if ($products->isEmpty()) {
             $this->error('Nenhum produto encontrado');

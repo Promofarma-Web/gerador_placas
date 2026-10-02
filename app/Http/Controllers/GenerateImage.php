@@ -26,7 +26,8 @@ final class GenerateImage extends Controller
         try {
             $logger = $this->logger->handle($payload);
 
-            $results = $this->batch->handle($logger, $payload);
+            /** Dispara PaperGenerated só para salvar os caminhos (SavePath); a API não notifica a loja */
+            $results = $this->batch->handle($logger, $payload, true, notify: false);
 
             return response()->json([
                 'status' => 'success',

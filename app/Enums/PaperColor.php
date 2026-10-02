@@ -18,6 +18,14 @@ enum PaperColor: string
         };
     }
 
+    /** Texto da coluna "Tipo de Folha" na notificação: Folha Picotada Amarela */
+    public static function paperFrom(?string $hex): ?string
+    {
+        $color = self::tryFrom(strtoupper((string) $hex));
+
+        return $color ? 'Folha Picotada ' . $color->label() : null;
+    }
+
     public static function labelFrom(?string $hex): string
     {
         return self::tryFrom(strtoupper((string) $hex))?->label() ?? (string) $hex;

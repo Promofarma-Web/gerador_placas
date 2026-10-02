@@ -9,8 +9,8 @@
     </a>
 </p>
 <ul>
-    <li>Folhas Brancas: Alteração de Preço</li>
-    <li>Folhas Amarelo: Promoção</li>
+    <li>Folhas Brancas: Alterações de Preço</li>
+    <li>Folhas Amarelas: Promoção</li>
     <li>Folhas Rosas: PromoClube</li>
 </ul>
 

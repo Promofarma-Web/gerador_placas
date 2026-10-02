@@ -42,7 +42,7 @@ class RecoverProducts extends Command
         $perPaper = $quantity !== null ? (int) $quantity : null;
         $agrupar = (bool) $this->option('agrupar');
 
-        $products = DailyProducts::getDailyProducts($this->option('loja'));
+        $products = DailyProducts::getDailyProducts($this->option('loja'))->take(10);
 
         if ($products->isEmpty()) {
             $this->error('Nenhum produto encontrado');
@@ -69,10 +69,10 @@ class RecoverProducts extends Command
                             'quantity' => $product->TOTAL_IMPRESSOES,
                             'description' => $product->DESCRICAO_REDUZIDA,
                             'ean' => $product->EAN,
-                            'max_price' => $product->PRECO_MAXIMO,
-                            'sail_price' => $product->PRECO_VENDA ? $product->PRECO_VENDA : $product->PRECO_MAXIMO,
-                            'promotion_price' => $product->PRECO_PROMOCAO ? $product->PRECO_PROMOCAO : $product->PRECO_VENDA,
-                            'percentage_discount' => $product->SUBTITULO_1,
+                            'max_price' => $this->decimalComma($product->PRECO_MAXIMO),
+                            'sail_price' => $this->decimalComma($product->PRECO_VENDA ? $product->PRECO_VENDA : $product->PRECO_MAXIMO),
+                            'promotion_price' => $this->decimalComma($product->PRECO_PROMOCAO ? $product->PRECO_PROMOCAO : $product->PRECO_VENDA),
+                            'percentage_discount' => $this->decimalComma($product->SUBTITULO_1),
                             'initial_date' => $product->DATA_INICIAL,
                             'final_date' => $product->DATA_FINAL,
                             'buy' => $product->LEVE,
@@ -134,5 +134,11 @@ class RecoverProducts extends Command
                 }
             }
         }
+    }
+
+    /** Troca o ponto decimal por vírgula (15.99 => 15,99) para exibir no template */
+    private function decimalComma(mixed $value): ?string
+    {
+        return $value === null ? null : str_replace('.', ',', (string) $value);
     }
 }

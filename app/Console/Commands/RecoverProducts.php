@@ -6,6 +6,7 @@ use App\Dto\Payload;
 use App\Events\StorePapersGenerated;
 use App\Models\DailyProducts;
 use App\Models\Logs;
+use App\Query\ClubProductsQuery;
 use App\Services\Generetor\BatchLabelGenerator;
 use App\Services\RequestLogger\RequestLogger;
 use Illuminate\Console\Command;
@@ -69,10 +70,7 @@ class RecoverProducts extends Command
                             'quantity' => $product->TOTAL_IMPRESSOES,
                             'description' => $product->DESCRICAO_REDUZIDA,
                             'ean' => $product->EAN,
-                            /** Produtos do clube exibem o preço "de" completo: de R$ 15,99 */
-                            'max_price' => $product->PROCFIT_TIPO === 'PROMOCLUBE'
-                                ? 'de R$ ' . $this->decimalComma($product->PRECO_MAXIMO)
-                                : $this->decimalComma($product->PRECO_MAXIMO),
+                            'max_price' => $this->decimalComma($product->PRECO_MAXIMO),
                             'sail_price' => $this->decimalComma($product->PRECO_VENDA ? $product->PRECO_VENDA : $product->PRECO_MAXIMO),
                             'promotion_price' => $this->decimalComma($product->PRECO_PROMOCAO ? $product->PRECO_PROMOCAO : $product->PRECO_VENDA),
                             'percentage_discount' => $this->decimalComma($product->SUBTITULO_1),
@@ -101,6 +99,7 @@ class RecoverProducts extends Command
                     ];
 
                     $dto = Payload::fromArray($data);
+                    $dto = $dto->withClubMaxPrice(ClubProductsQuery::clubIds($dto->resultIds()));
                     $logger = $requestLogger->handle($dto);
 
                     /** Os listeners de PaperGenerated salvam os caminhos e, sem --agrupar, notificam a loja */

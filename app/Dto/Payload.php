@@ -33,6 +33,34 @@ final readonly class Payload
         );
     }
 
+    /** IDs de ETIQUETA_PLACAS_RESULTADO enviados nos produtos */
+    public function resultIds(): array
+    {
+        return array_values(array_unique(array_filter(array_map(
+            fn(PayloadProduct $product): ?int => $product->nameplate_label_printing,
+            $this->payloads,
+        ))));
+    }
+
+    public function withClubMaxPrice(array $clubIds): self
+    {
+        if ($clubIds === []) {
+            return $this;
+        }
+
+        return new self(
+            templateId: $this->templateId,
+            store: $this->store,
+            type: $this->type,
+            impressionDate: $this->impressionDate,
+            payloads: array_map(fn(PayloadProduct $product): PayloadProduct => in_array(
+                $product->nameplate_label_printing,
+                $clubIds,
+                true,
+            ) ? $product->withClubMaxPrice() : $product, $this->payloads),
+        );
+    }
+
     public function toArray(): array
     {
         return [

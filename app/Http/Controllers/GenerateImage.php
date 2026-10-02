@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GenerateImageRequest;
+use App\Query\ClubProductsQuery;
 use App\Services\Generetor\BatchLabelGenerator;
 use App\Services\RequestLogger\RequestLogger;
 use Illuminate\Http\JsonResponse;
@@ -20,6 +21,7 @@ final class GenerateImage extends Controller
     public function __invoke(GenerateImageRequest $request): JsonResponse
     {
         $payload = $request->toData();
+        $payload = $payload->withClubMaxPrice(ClubProductsQuery::clubIds($payload->resultIds()));
 
 
 

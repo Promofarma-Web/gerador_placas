@@ -6,6 +6,8 @@ namespace App\Dto;
 
 final readonly class PayloadProduct
 {
+    private const CLUB_PREFIX = 'de R$ ';
+
     public function __construct(
         public int $product,
         public int $family,
@@ -80,6 +82,16 @@ final readonly class PayloadProduct
             'Y' => $this->y,
             'nameplate_label_printing' => $this->nameplate_label_printing,
         ];
+    }
+
+    /** Produtos do clube exibem o preço "de" completo: de R$ 15,99 */
+    public function withClubMaxPrice(): self
+    {
+        if (str_starts_with($this->max_price, self::CLUB_PREFIX)) {
+            return $this;
+        }
+
+        return new self(...[...get_object_vars($this), 'max_price' => self::CLUB_PREFIX . $this->max_price]);
     }
 
     public function toAttributes(): array

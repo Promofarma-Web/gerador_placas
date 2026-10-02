@@ -19,12 +19,17 @@ final readonly class Notification
 
     public static function fromLogger(RequestGeneratorImage $logger, View $content): self
     {
+        return self::fromStore((int) $logger->LOJA, $content);
+    }
+
+    public static function fromStore(int $store, View $content): self
+    {
         return new self(
-            title: "Precificação - Loja {$logger->LOJA}",
+            title: "Precificação - Loja {$store}",
             content: $content,
             categoryId: 13,
             userId: 2,
-            recipientIds: [$logger->LOJA], //[$logger->LOJA],
+            recipientIds: [$store],
         );
     }
 

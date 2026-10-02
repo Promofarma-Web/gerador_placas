@@ -18,7 +18,7 @@ class RecoverProducts extends Command
      */
     protected $signature = 'products:recover
         {--loja= : Empresa (formato: inteiro)}
-        {--quantidade= : Quantidade de etiquetas por folha (padrão: 25)}';
+        {--quantity= : Quantidade de etiquetas por folha (padrão: 25)}';
 
     /**
      * The console command description.
@@ -29,17 +29,17 @@ class RecoverProducts extends Command
 
     public function handle(BatchLabelGenerator $generator, RequestLogger $requestLogger)
     {
-        $quantidade = $this->option('quantidade');
+        $quantity = $this->option('quantity');
 
-        if ($quantidade !== null && (! ctype_digit((string) $quantidade) || (int) $quantidade < 1)) {
-            $this->error('A opção --quantidade deve ser um inteiro maior que zero');
+        if ($quantity !== null && (! ctype_digit((string) $quantity) || (int) $quantity < 1)) {
+            $this->error('A opção --quantity deve ser um inteiro maior que zero');
 
             return;
         }
 
-        $perPaper = $quantidade !== null ? (int) $quantidade : null;
+        $perPaper = $quantity !== null ? (int) $quantity : null;
 
-        $products = DailyProducts::getDailyProducts($this->option('loja'))->take(1);
+        $products = DailyProducts::getDailyProducts($this->option('loja'))->take(75);
 
         if ($products->isEmpty()) {
             $this->error('Nenhum produto encontrado');
@@ -60,7 +60,7 @@ class RecoverProducts extends Command
                     ->map(function ($product) {
                         return [
                             'product' => $product->PRODUTO,
-                            'quantidade' => $product->TOTAL_IMPRESSOES,
+                            'quantity' => $product->TOTAL_IMPRESSOES,
                             'description' => $product->DESCRICAO_REDUZIDA,
                             'ean' => $product->EAN,
                             'max_price' => $product->PRECO_MAXIMO,

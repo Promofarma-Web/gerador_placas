@@ -18,20 +18,24 @@
     <thead>
         <tr>
             <th style='border: 1px solid #ddd; padding: 10px; text-align: left'>Tipo de Folha</th>
+            <th style='border: 1px solid #ddd; padding: 10px; text-align: left'>Tipo</th>
             <th style='border: 1px solid #ddd; padding: 10px; text-align: left'>Cor da Folha</th>
             <th style='border: 1px solid #ddd; padding: 10px; text-align: left'>PDF</th>
         </tr>
     </thead>
     <tbody>
-        @foreach ($paths as $path)
-            @foreach ($folhas as $folha)
-                <tr style="background-color: {{ $folha['cor'] }}">
-                    <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['tipo_folha'] }}</td>
-                    <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['cor_nome'] }}</td>
-                    <td style='border: 1px solid #ddd; padding: 10px'>
-                        <a href="{{ url('img/' . $path) }}">Clique aqui para o Download</a>
-                    </td>
-                </tr>
+        @foreach ($registros as $registro)
+            @foreach ($registro['paths'] as $path)
+                @foreach ($registro['folhas'] as $folha)
+                    <tr style="background-color: {{ $folha['cor'] }}">
+                        <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['tipo_folha'] }}</td>
+                        <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['tipo'] }}</td>
+                        <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['cor_nome'] }}</td>
+                        <td style='border: 1px solid #ddd; padding: 10px'>
+                            <a href="{{ url('img/' . $path) }}">Clique aqui para o Download</a>
+                        </td>
+                    </tr>
+                @endforeach
             @endforeach
         @endforeach
     </tbody>

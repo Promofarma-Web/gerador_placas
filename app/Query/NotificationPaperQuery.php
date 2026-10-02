@@ -35,8 +35,9 @@ class NotificationPaperQuery
                 'cor' => '#' . $item->COR_PLANO_FUNDO,
                 'cor_nome' => PaperColorEnum::labelFrom($item->COR_PLANO_FUNDO),
                 'promocao' => TypePagesEnum::descricaoPromocao($item->PROCFIT_TIPO, $item->PRECO_PROMOCAO),
+                'tipo' => $item->PROCFIT_TIPO ? (TypePagesEnum::tryFrom($item->PROCFIT_TIPO)?->descricao() ?? $item->PROCFIT_TIPO) : null,
             ])
-            ->unique(fn ($item) => $item['tipo_folha'] . '|' . $item['cor'])
+            ->unique(fn ($item) => $item['tipo_folha'] . '|' . $item['cor'] . '|' . $item['tipo'])
             ->values();
     }
 }

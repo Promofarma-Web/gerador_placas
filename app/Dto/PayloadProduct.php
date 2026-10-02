@@ -75,6 +75,9 @@ final readonly class PayloadProduct
             'expiration_date' => $this->expiration_date,
             'x' => $this->x,
             'y' => $this->y,
+            /** Alguns templates leem X/Y em maiúsculo */
+            'X' => $this->x,
+            'Y' => $this->y,
             'nameplate_label_printing' => $this->nameplate_label_printing,
         ];
     }

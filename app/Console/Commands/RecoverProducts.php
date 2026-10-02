@@ -69,7 +69,10 @@ class RecoverProducts extends Command
                             'quantity' => $product->TOTAL_IMPRESSOES,
                             'description' => $product->DESCRICAO_REDUZIDA,
                             'ean' => $product->EAN,
-                            'max_price' => $this->decimalComma($product->PRECO_MAXIMO),
+                            /** Produtos do clube exibem o preço "de" completo: de R$ 15,99 */
+                            'max_price' => $product->PROCFIT_TIPO === 'PROMOCLUBE'
+                                ? 'de R$ ' . $this->decimalComma($product->PRECO_MAXIMO)
+                                : $this->decimalComma($product->PRECO_MAXIMO),
                             'sail_price' => $this->decimalComma($product->PRECO_VENDA ? $product->PRECO_VENDA : $product->PRECO_MAXIMO),
                             'promotion_price' => $this->decimalComma($product->PRECO_PROMOCAO ? $product->PRECO_PROMOCAO : $product->PRECO_VENDA),
                             'percentage_discount' => $this->decimalComma($product->SUBTITULO_1),

@@ -20,7 +20,7 @@ final class BatchLabelGenerator
     ) {}
 
     //
-    public function handle(RequestGeneratorImage $logger, Payload $payload, bool $isSend = false): array
+    public function handle(RequestGeneratorImage $logger, Payload $payload, bool $isSend = false, ?int $perPaper = null): array
     {
 
 
@@ -31,7 +31,7 @@ final class BatchLabelGenerator
         $results = $this->image->handle($payload);
 
         /** Faz nivelamento do array de produtos e quebra em 25 (50 items são 2 arrays com 25 produtos cada) */
-        $chunks = $results->chunk(self::PER_PAPER);
+        $chunks = $results->chunk($perPaper ?? self::PER_PAPER);
 
         /** Nome do pdf: print-data-loja-tipo_etiqueta (com sufixo -N quando houver mais de um pdf) */
         $filename = sprintf(

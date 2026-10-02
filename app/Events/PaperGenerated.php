@@ -16,5 +16,7 @@ final class PaperGenerated
     public function __construct(
         public RequestGeneratorImage $logger,
         public array $paths,
+        /** false quando a notificação será enviada agrupada por loja (StorePapersGenerated) */
+        public bool $notify = true,
     ) {}
 }

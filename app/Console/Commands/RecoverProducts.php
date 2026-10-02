@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Dto\Payload;
+use App\Events\StorePapersGenerated;
 use App\Models\DailyProducts;
 use App\Models\Logs;
 use App\Services\Generetor\BatchLabelGenerator;
@@ -18,7 +19,8 @@ class RecoverProducts extends Command
      */
     protected $signature = 'products:recover
         {--loja= : Empresa (formato: inteiro)}
-        {--quantity= : Quantidade de etiquetas por folha (padrão: 25)}';
+        {--quantity= : Quantidade de etiquetas por folha (padrão: 25)}
+        {--agrupar : Envia uma única notificação por loja com todos os PDFs gerados}';
 
     /**
      * The console command description.
@@ -38,6 +40,7 @@ class RecoverProducts extends Command
         }
 
         $perPaper = $quantity !== null ? (int) $quantity : null;
+        $agrupar = (bool) $this->option('agrupar');
 
         $products = DailyProducts::getDailyProducts($this->option('loja'));
 
@@ -53,6 +56,9 @@ class RecoverProducts extends Command
             $grouped = $storeProducts->groupBy(function ($product) {
                 return $product->ID_TEMPLATE . '_' . $product->loja;
             });
+
+            /** PDFs gerados na loja, usados na notificação agrupada */
+            $generated = [];
 
             foreach ($grouped as $group) {
                 $first = $group->first();
@@ -94,9 +100,12 @@ class RecoverProducts extends Command
                     $dto = Payload::fromArray($data);
                     $logger = $requestLogger->handle($dto);
 
-                    /** Os listeners de PaperGenerated salvam os caminhos e notificam a loja */
+                    /** Os listeners de PaperGenerated salvam os caminhos e, sem --agrupar, notificam a loja */
+                    $paths = $generator->handle($logger, $dto, true, $perPaper, notify: ! $agrupar);
 
-                    $generator->handle($logger, $dto, true, $perPaper);
+                    if ($agrupar) {
+                        $generated[] = ['logger' => $logger, 'paths' => $paths];
+                    }
 
                     $ids = $group->pluck('ID')->implode(', ');
                     Logs::create([
@@ -113,6 +122,15 @@ class RecoverProducts extends Command
                 } catch (\Throwable $th) {
                     $this->error("Erro no template {$first->ID_TEMPLATE} | Loja {$first->loja}: " . $th->getMessage());
                     continue;
+                }
+            }
+
+            if ($agrupar && $generated !== []) {
+                try {
+                    StorePapersGenerated::dispatch((int) $loja, $generated);
+                    $this->info("Notificação agrupada enviada para a loja {$loja} (" . count($generated) . ' templates)');
+                } catch (\Throwable $th) {
+                    $this->error("Erro ao enviar a notificação agrupada da loja {$loja}: " . $th->getMessage());
                 }
             }
         }

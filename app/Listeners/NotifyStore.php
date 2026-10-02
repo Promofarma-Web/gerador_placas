@@ -17,12 +17,17 @@ final class NotifyStore
 
     public function handle(PaperGenerated $event): void
     {
+        if (! $event->notify) {
+            return;
+        }
+
         $payload = Notification::fromLogger(
             logger: $event->logger,
             content: view('notification-content', [
-                'logger' => $event->logger,
-                'paths' => $event->paths,
-                'folhas' => NotificationPaperQuery::getPapersByRequest($event->logger),
+                'registros' => [[
+                    'paths' => $event->paths,
+                    'folhas' => NotificationPaperQuery::getPapersByRequest($event->logger),
+                ]],
             ]),
         );
 

@@ -16,7 +16,9 @@ class RecoverProducts extends Command
      *
      * @var string
      */
-    protected $signature = 'products:recover {--loja= : Empresa (formato: inteiro)}';
+    protected $signature = 'products:recover
+        {--loja= : Empresa (formato: inteiro)}
+        {--quantidade= : Quantidade de etiquetas por folha (padrão: 25)}';
 
     /**
      * The console command description.
@@ -27,7 +29,17 @@ class RecoverProducts extends Command
 
     public function handle(BatchLabelGenerator $generator, RequestLogger $requestLogger)
     {
-        $products = DailyProducts::getDailyProducts($this->option('loja'));
+        $quantidade = $this->option('quantidade');
+
+        if ($quantidade !== null && (! ctype_digit((string) $quantidade) || (int) $quantidade < 1)) {
+            $this->error('A opção --quantidade deve ser um inteiro maior que zero');
+
+            return;
+        }
+
+        $perPaper = $quantidade !== null ? (int) $quantidade : null;
+
+        $products = DailyProducts::getDailyProducts($this->option('loja'))->take(1);
 
         if ($products->isEmpty()) {
             $this->error('Nenhum produto encontrado');
@@ -48,7 +60,7 @@ class RecoverProducts extends Command
                     ->map(function ($product) {
                         return [
                             'product' => $product->PRODUTO,
-                            'quantity' => $product->TOTAL_IMPRESSOES,
+                            'quantidade' => $product->TOTAL_IMPRESSOES,
                             'description' => $product->DESCRICAO_REDUZIDA,
                             'ean' => $product->EAN,
                             'max_price' => $product->PRECO_MAXIMO,
@@ -84,7 +96,7 @@ class RecoverProducts extends Command
 
                     /** Os listeners de PaperGenerated salvam os caminhos e notificam a loja */
 
-                    $generator->handle($logger, $dto, true);
+                    $generator->handle($logger, $dto, true, $perPaper);
 
                     $ids = $group->pluck('ID')->implode(', ');
                     Logs::create([

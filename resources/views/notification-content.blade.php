@@ -4,10 +4,7 @@
     o
     download do arquivo.
 </p>
-<p>Em caso de dúvidas, consulte o passo a passo disponível no manual abaixo:
-    <a href="http://intranet.promofarma.int/manual/pdf/Procedimento%20para%20impress%C3%A3o.pdf"> Acesso o manual aqui
-    </a>
-</p>
+
 <ul>
     <li>Folhas Brancas: Alterações de Preço</li>
     <li>Folhas Amarelas: Promoção</li>
@@ -19,7 +16,7 @@
         <tr>
             <th style='border: 1px solid #ddd; padding: 10px; text-align: left'>Tipo de Folha</th>
             <th style='border: 1px solid #ddd; padding: 10px; text-align: left'>Tipo</th>
-            <th style='border: 1px solid #ddd; padding: 10px; text-align: left'>Cor da Folha</th>
+
             <th style='border: 1px solid #ddd; padding: 10px; text-align: left'>PDF</th>
         </tr>
     </thead>
@@ -30,7 +27,7 @@
                     <tr style="background-color: {{ $folha['cor'] }}">
                         <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['tipo_folha'] }}</td>
                         <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['tipo'] }}</td>
-                        <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['cor_nome'] }}</td>
+
                         <td style='border: 1px solid #ddd; padding: 10px'>
                             <a href="{{ url('img/' . $path) }}">Clique aqui para o Download</a>
                         </td>

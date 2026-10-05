@@ -14,9 +14,9 @@ final readonly class PayloadProduct
         public int $quantity,
         public string $description,
         public string $ean,
-        public string $max_price,
-        public string $sail_price,
-        public string $promotion_price,
+        public ?string $max_price,
+        public ?string $sail_price,
+        public ?string $promotion_price,
         public ?string $percentage_discount,
         public ?string $initial_date,
         public ?string $final_date,
@@ -39,9 +39,9 @@ final readonly class PayloadProduct
             quantity: (int) $data['quantity'],
             description: (string) $data['description'],
             ean: (string) $data['ean'],
-            max_price: (string) $data['max_price'],
-            sail_price: (string) $data['sail_price'],
-            promotion_price: (string) $data['promotion_price'],
+            max_price: isset($data['max_price']) ? (string) $data['max_price'] : null,
+            sail_price: isset($data['sail_price']) ? (string) $data['sail_price'] : null,
+            promotion_price: isset($data['promotion_price']) ? (string) $data['promotion_price'] : null,
             percentage_discount: isset($data['percentage_discount']) ? (string) $data['percentage_discount'] : null,
             initial_date: $data['initial_date'] ?? null,
             final_date: $data['final_date'] ?? null,
@@ -87,7 +87,7 @@ final readonly class PayloadProduct
     /** Produtos do clube exibem o preço "de" completo: de R$ 15,99 */
     public function withClubMaxPrice(): self
     {
-        if (str_starts_with($this->max_price, self::CLUB_PREFIX)) {
+        if (blank($this->max_price) || str_starts_with($this->max_price, self::CLUB_PREFIX)) {
             return $this;
         }
 

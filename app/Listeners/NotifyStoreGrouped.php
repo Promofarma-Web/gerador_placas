@@ -7,6 +7,7 @@ namespace App\Listeners;
 use App\Dto\Notification;
 use App\Events\StorePapersGenerated;
 use App\Query\NotificationPaperQuery;
+use App\Query\PendingDownloadQuery;
 use App\Services\Notification\NotificationSender;
 
 final class NotifyStoreGrouped
@@ -26,6 +27,7 @@ final class NotifyStoreGrouped
             store: $event->store,
             content: view('notification-content', [
                 'registros' => $registros,
+                'pendentes' => PendingDownloadQuery::getByStore($event->store),
             ]),
         );
 

@@ -27,7 +27,6 @@
                     <tr style="background-color: {{ $folha['cor'] }}">
                         <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['tipo_folha'] }}</td>
                         <td style='border: 1px solid #ddd; padding: 10px'>{{ $folha['tipo'] }}</td>
-
                         <td style='border: 1px solid #ddd; padding: 10px'>
                             <a href="{{ url('img/' . $path) }}">Clique aqui para o Download</a>
                         </td>

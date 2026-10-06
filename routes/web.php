@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Query\DownloadPdfQuery;
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,7 +15,9 @@ Route::get('/img/{filename}', function ($filename) {
     if (!file_exists($path)) {
         abort(404);
     }
-    
+
+    DownloadPdfQuery::markAsDownloaded($filename);
+
     return response()->file($path, [
         'Content-Type' => 'application/pdf',
     ]);

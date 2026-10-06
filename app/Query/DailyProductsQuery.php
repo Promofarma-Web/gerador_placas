@@ -14,6 +14,8 @@ class DailyProductsQuery
             ->pluck('ETIQUETA_PLACAS_RESULTADO_ID')
             ->toArray();
 
+
+
         return DailyProducts::query()
             ->whereNotNull('ID_TEMPLATE')
             ->whereNotNull('LOJA')

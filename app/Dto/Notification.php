@@ -38,6 +38,7 @@ final readonly class Notification
         return [
             'title' => $this->title,
             'content' => $this->content instanceof View ? $this->content->render() : $this->content,
+            'type' => 'toast',
             'category_id' => $this->categoryId,
             'user_id' => $this->userId,
             'recipient_ids' => [...$this->recipientIds],

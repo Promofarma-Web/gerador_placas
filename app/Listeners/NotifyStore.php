@@ -7,6 +7,7 @@ namespace App\Listeners;
 use App\Dto\Notification;
 use App\Events\PaperGenerated;
 use App\Query\NotificationPaperQuery;
+use App\Query\PendingDownloadQuery;
 use App\Services\Notification\NotificationSender;
 
 final class NotifyStore
@@ -28,6 +29,7 @@ final class NotifyStore
                     'paths' => $event->paths,
                     'folhas' => NotificationPaperQuery::getPapersByRequest($event->logger),
                 ]],
+                'pendentes' => PendingDownloadQuery::getByStore((int) $event->logger->LOJA),
             ]),
         );
 

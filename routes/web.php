@@ -7,8 +7,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// /img/* é servido direto pelo servidor web (arquivo estático), por isso o download passa por esta rota
-Route::get('/download/{filename}', function (string $filename) {
+$downloadPdf = function (string $filename) {
     $filename = basename($filename);
     $path = public_path('img/' . $filename);
 
@@ -21,4 +20,9 @@ Route::get('/download/{filename}', function (string $filename) {
     return response()->download($path, $filename, [
         'Content-Type' => 'application/pdf',
     ]);
-})->name('pdf.download');
+};
+
+Route::get('/download/{filename}', $downloadPdf)->name('pdf.download');
+
+// Links antigos (notificações já enviadas); o nginx encaminha /img/*.pdf para o Laravel
+Route::get('/img/{filename}', $downloadPdf)->where('filename', '.+\.pdf');

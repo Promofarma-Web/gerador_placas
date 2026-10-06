@@ -7,9 +7,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// routes/web.php
-
-Route::get('/img/{filename}', function ($filename) {
+// /img/* é servido direto pelo servidor web (arquivo estático), por isso o download passa por esta rota
+Route::get('/download/{filename}', function (string $filename) {
+    $filename = basename($filename);
     $path = public_path('img/' . $filename);
 
     if (!file_exists($path)) {
@@ -18,7 +18,7 @@ Route::get('/img/{filename}', function ($filename) {
 
     DownloadPdfQuery::markAsDownloaded($filename);
 
-    return response()->file($path, [
+    return response()->download($path, $filename, [
         'Content-Type' => 'application/pdf',
     ]);
-});
+})->name('pdf.download');

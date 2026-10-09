@@ -2,6 +2,7 @@
 
 namespace App\Query;
 
+use App\Enums\TypePages as TypePagesEnum;
 use App\Models\DailyProducts;
 use App\Models\RequestGeneratorImageProduct;
 
@@ -30,11 +31,12 @@ class DailyProductsQuery
                     default => 2,
                 };
 
-                if ((float) $item->PRECO_PROMOCAO == 0) {
-                    $item->PRECO_PROMOCAO = (string) $item->SUBTITULO_2;
-                } else {
-                    $item->PRECO_PROMOCAO = (string) $item->PRECO_PROMOCAO;
-                }
+                $item->PRECO_PROMOCAO = TypePagesEnum::precoPromocao(
+                    $item->PROCFIT_TIPO,
+                    $item->PRECO_PROMOCAO,
+                    $item->PRECO_VENDA,
+                    $item->SUBTITULO_2,
+                );
 
                 if ($item->DATA_FINAL == null) {
                     $item->DATA_FINAL = $item->DATA_VALIDADE_PRODUTO;

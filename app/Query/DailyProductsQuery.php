@@ -45,6 +45,7 @@ class DailyProductsQuery
                     $item->PROCFIT_TIPO,
                     $item->PRECO_PROMOCAO,
                     $item->PRECO_VENDA,
+                    $item->PRECO_MAXIMO,
                     $item->SUBTITULO_2,
                 );
 

@@ -33,12 +33,13 @@ final class BatchLabelGenerator
         /** Faz nivelamento do array de produtos e quebra em 25 (50 items são 2 arrays com 25 produtos cada) */
         $chunks = $results->chunk($perPaper ?? self::PER_PAPER);
 
-        /** Nome do pdf: print-data-loja-tipo_etiqueta (com sufixo -N quando houver mais de um pdf) */
+        /** Nome do pdf: print-data-loja-tipo_etiqueta-requisicao (com sufixo -N quando houver mais de um pdf); a requisição garante nome único */
         $filename = sprintf(
-            'print-%s-%d-%s',
+            'print-%s-%d-%s-%d',
             now()->format('d-m-Y'),
             $payload->store,
             strtolower($payload->type->name),
+            $logger->REQUISICAO_GERADOR_PLACAS,
         );
 
         $paths = $chunks

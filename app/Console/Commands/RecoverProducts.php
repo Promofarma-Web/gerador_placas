@@ -21,7 +21,8 @@ class RecoverProducts extends Command
     protected $signature = 'products:recover
         {--loja= : Empresa (formato: inteiro)}
         {--quantity= : Quantidade de etiquetas por folha (padrão: 25)}
-        {--agrupar : Envia uma única notificação por loja com todos os PDFs gerados}';
+        {--agrupar : Envia uma única notificação por loja com todos os PDFs gerados}
+        {--todos : Ignora os produtos já gerados e gera novamente todos os produtos da loja}';
 
     /**
      * The console command description.
@@ -43,7 +44,7 @@ class RecoverProducts extends Command
         $perPaper = $quantity !== null ? (int) $quantity : null;
         $agrupar = (bool) $this->option('agrupar');
 
-        $products = DailyProducts::getDailyProducts($this->option('loja'));
+        $products = DailyProducts::getDailyProducts($this->option('loja'), (bool) $this->option('todos'));
 
         if ($products->isEmpty()) {
             $this->error('Nenhum produto encontrado');

@@ -7,9 +7,10 @@ use App\Models\RequestGeneratorImageProduct;
 
 class DailyProductsQuery
 {
-    public static function getDailyProducts($loja)
+    /** $todos = true ignora os produtos já gerados e devolve todos os da loja */
+    public static function getDailyProducts($loja, bool $todos = false)
     {
-        $idsGerados = RequestGeneratorImageProduct::query()
+        $idsGerados = $todos ? [] : RequestGeneratorImageProduct::query()
             ->whereNotNull('ETIQUETA_PLACAS_RESULTADO_ID')
             ->pluck('ETIQUETA_PLACAS_RESULTADO_ID')
             ->toArray();
@@ -19,7 +20,7 @@ class DailyProductsQuery
         return DailyProducts::query()
             ->whereNotNull('ID_TEMPLATE')
             ->whereNotNull('LOJA')
-            ->whereNotIn('ID', $idsGerados)
+            ->when($idsGerados !== [], fn ($query) => $query->whereNotIn('ID', $idsGerados))
             ->where('loja', $loja)
             ->get()
             ->map(function ($item) {

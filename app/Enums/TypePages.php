@@ -47,6 +47,18 @@ enum TypePages: string
         };
     }
 
+    /** Preço promocional, mesma regra do CASE da USP_PROMOCOES_CONSULTA_PRODUTO */
+    public static function precoPromocao(?string $procfitTipo, $precoPromocao, $precoVenda, $subtitulo2): string
+    {
+        return (string) match (self::tryFrom((string) $procfitTipo)) {
+            self::LEVEX_PAGUEY,
+            self::PROMOCOES_FLEXIVEIS,
+            self::PROMOCOES_AGRUPAMENTOS => $subtitulo2,
+            self::PRODUTOS_PV => $precoPromocao,
+            default => $precoVenda,
+        };
+    }
+
     /** Descrição da promoção a partir do PROCFIT_TIPO (substitui o CASE do SQL) */
     public static function descricaoPromocao(?string $procfitTipo, $precoPromocao): string
     {

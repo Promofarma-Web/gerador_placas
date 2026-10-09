@@ -56,7 +56,7 @@ class RecoverProducts extends Command
         foreach ($byStore as $loja => $storeProducts) {
             $this->info("Processando loja: {$loja} - " . now()->format('d/m/Y H:i:s'));
             $grouped = $storeProducts->groupBy(function ($product) {
-                return $product->ID_TEMPLATE . '_' . $product->loja;
+                return $product->ID_TEMPLATE . '_' . $product->loja . '_' . $product->PROCFIT_TIPO;
             });
 
             /** PDFs gerados na loja, usados na notificação agrupada */

@@ -13,15 +13,14 @@ class DailyProductsQuery
     {
         $idsGerados = $todos ? [] : RequestGeneratorImageProduct::query()
             ->whereNotNull('ETIQUETA_PLACAS_RESULTADO_ID')
+            ->distinct()
             ->pluck('ETIQUETA_PLACAS_RESULTADO_ID')
-            ->toArray();
-
-
+            ->flip()
+            ->all();
 
         return DailyProducts::query()
             ->whereNotNull('ID_TEMPLATE')
             ->whereNotNull('LOJA')
-            ->when($idsGerados !== [], fn ($query) => $query->whereNotIn('ID', $idsGerados))
             ->where('loja', $loja)
             /** Mesma regra da USP_PROMOCOES_CONSULTA_PRODUTO: promoção vigente hoje, exceto ETIQUETAS_GONDULA */
             ->where(function ($query) {
@@ -34,6 +33,9 @@ class DailyProductsQuery
                     });
             })
             ->get()
+            /** Filtra em PHP: whereNotIn estoura o limite de 2100 parâmetros do SQL Server */
+            ->reject(fn ($item) => isset($idsGerados[$item->ID]))
+            ->values()
             ->map(function ($item) {
                 $item->TIPO_TEMPLATE = match (true) {
                     in_array((int) $item->ID_TEMPLATE, [91, 92, 93]) => 1,

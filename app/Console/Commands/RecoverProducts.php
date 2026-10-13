@@ -4,12 +4,14 @@ namespace App\Console\Commands;
 
 use App\Dto\Payload;
 use App\Events\StorePapersGenerated;
+use App\Mail\RecoverProductsFailed;
 use App\Models\DailyProducts;
 use App\Models\Logs;
 use App\Query\ClubProductsQuery;
 use App\Services\Generetor\BatchLabelGenerator;
 use App\Services\RequestLogger\RequestLogger;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 
 class RecoverProducts extends Command
 {
@@ -31,7 +33,28 @@ class RecoverProducts extends Command
      */
     protected $description = 'Command description';
 
+    /** Erros da execução, enviados por e-mail ao final */
+    private array $failures = [];
+
     public function handle(BatchLabelGenerator $generator, RequestLogger $requestLogger)
+    {
+        try {
+            $this->process($generator, $requestLogger);
+        } catch (\Throwable $th) {
+            $this->error('Erro inesperado: ' . $th->getMessage());
+            $this->failures[] = 'Erro inesperado: ' . $this->describe($th);
+        }
+
+        if ($this->failures === []) {
+            return self::SUCCESS;
+        }
+
+        $this->notifyFailures();
+
+        return self::FAILURE;
+    }
+
+    private function process(BatchLabelGenerator $generator, RequestLogger $requestLogger): void
     {
         $quantity = $this->option('quantity');
 
@@ -124,6 +147,7 @@ class RecoverProducts extends Command
                     );
                 } catch (\Throwable $th) {
                     $this->error("Erro no template {$first->ID_TEMPLATE} | Loja {$first->loja}: " . $th->getMessage());
+                    $this->failures[] = "Template {$first->ID_TEMPLATE} | Loja {$first->loja}: " . $this->describe($th);
                     continue;
                 }
             }
@@ -134,9 +158,27 @@ class RecoverProducts extends Command
                     $this->info("Notificação agrupada enviada para a loja {$loja} (" . count($generated) . ' templates)');
                 } catch (\Throwable $th) {
                     $this->error("Erro ao enviar a notificação agrupada da loja {$loja}: " . $th->getMessage());
+                    $this->failures[] = "Notificação agrupada da loja {$loja}: " . $this->describe($th);
                 }
             }
         }
+    }
+
+    /** Envia um e-mail com os erros da execução; falha no envio não derruba o comando */
+    private function notifyFailures(): void
+    {
+        try {
+            Mail::to(config('mail.alert_to'))->send(new RecoverProductsFailed($this->options(), $this->failures));
+            $this->info('E-mail de erro enviado para ' . config('mail.alert_to'));
+        } catch (\Throwable $th) {
+            $this->error('Erro ao enviar o e-mail de erro: ' . $th->getMessage());
+            report($th);
+        }
+    }
+
+    private function describe(\Throwable $th): string
+    {
+        return $th->getMessage() . ' (' . $th->getFile() . ':' . $th->getLine() . ')';
     }
 
     /** Troca o ponto decimal por vírgula (15.99 => 15,99) para exibir no template */

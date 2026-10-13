@@ -115,4 +115,15 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Alertas de erro
+    |--------------------------------------------------------------------------
+    |
+    | Destinatário dos e-mails enviados quando o comando products:recover falha.
+    |
+    */
+
+    'alert_to' => env('MAIL_ALERT_TO', 'viktor.santos@promofarma.com.br'),
+
 ];

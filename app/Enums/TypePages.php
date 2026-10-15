@@ -29,6 +29,21 @@ enum TypePages: string
         };
     }
 
+    /** Promoções para os filtros do consulta-produto (code = PROCFIT_TIPO, label = nomenclatura de notificacao) */
+    public static function options(): array
+    {
+        return array_map(
+            fn (string $code): array => ['code' => $code, 'label' => self::notificacao($code)],
+            self::codes(),
+        );
+    }
+
+    /** PROCFIT_TIPO aceitos nos filtros: casos do enum + PROMOCLUBE */
+    public static function codes(): array
+    {
+        return [...array_map(fn (self $tipo): string => $tipo->value, self::cases()), 'PROMOCLUBE'];
+    }
+
     /** Texto da coluna "Tipo" na notificação enviada à loja, a partir do PROCFIT_TIPO */
     public static function notificacao(?string $procfitTipo): ?string
     {

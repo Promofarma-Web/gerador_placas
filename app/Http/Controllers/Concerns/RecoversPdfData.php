@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Concerns;
 
 use App\Models\RequestGeneratorImage;
+use App\Query\PdfByPromotionQuery;
 use App\Query\PdfByStoreQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -141,8 +142,16 @@ trait RecoversPdfData
 
     protected function recoverPdfByStoreResponse(Request $request): JsonResponse
     {
-        $rows = PdfByStoreQuery::getPdfByStore($request);
+        return $this->groupedPdfResponse(PdfByStoreQuery::getPdfByStore($request));
+    }
 
+    protected function recoverPdfByPromotionResponse(Request $request): JsonResponse
+    {
+        return $this->groupedPdfResponse(PdfByPromotionQuery::getPdfByPromotion($request));
+    }
+
+    private function groupedPdfResponse(Collection $rows): JsonResponse
+    {
         if ($rows->isEmpty()) {
             return response()->json([
                 'status' => 'not_found',

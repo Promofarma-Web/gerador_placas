@@ -8,6 +8,7 @@ use App\Models\FamiliaProduto;
 use App\Models\Products;
 use App\Models\RequestGeneratorImage;
 use App\Models\RequestGeneratorImageProduct;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -15,6 +16,12 @@ use Illuminate\Support\Collection;
 class PdfByStoreQuery
 {
     public static function getPdfByStore(Request $request): Collection
+    {
+        return self::rows(self::query($request));
+    }
+
+    /** Requisições da loja com produtos, família e promoção, aplicando os filtros opcionais do request */
+    public static function query(Request $request): Builder
     {
         return RequestGeneratorImage::query()
             ->from(self::table(new RequestGeneratorImage, 'RGP'))
@@ -40,6 +47,13 @@ class PdfByStoreQuery
             ->when($request->filled('familia'), function ($query) use ($request) {
                 $query->where('B.FAMILIA', $request->familia);
             })
+            ->when($request->filled('promocao'), function ($query) use ($request) {
+                $query->where('C.PROCFIT_TIPO', $request->promocao);
+            })
+            // Mais novo primeiro
+            ->orderByDesc('RGP.DATA_REQUISICAO')
+            ->orderByDesc('RGP.HORA_REQUISICAO')
+            ->orderByDesc('RGP.REQUISICAO_GERADOR_PLACAS')
             ->select([
                 'RGP.REQUISICAO_GERADOR_PLACAS',
                 'RGP.TEMPLATE_ID',
@@ -54,10 +68,16 @@ class PdfByStoreQuery
                 'F.DESCRICAO as FAMILIA_DESCRICAO',
                 'C.PROCFIT_TIPO',
                 'C.PRECO_PROMOCAO',
-            ])
+            ]);
+    }
+
+    /** Executa a query e troca PROCFIT_TIPO/PRECO_PROMOCAO pelo nome da promoção (TypePages::notificacao) */
+    public static function rows(Builder $query): Collection
+    {
+        return $query
             ->get()
             ->map(function ($item) {
-                $item->DESCRICAO_PROMOCAO = TypePagesEnum::descricaoPromocao($item->PROCFIT_TIPO, $item->PRECO_PROMOCAO);
+                $item->DESCRICAO_PROMOCAO = TypePagesEnum::notificacao($item->PROCFIT_TIPO) ?? 'Etiquetas Reduzidas';
 
                 unset($item->PROCFIT_TIPO, $item->PRECO_PROMOCAO);
 

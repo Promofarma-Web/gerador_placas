@@ -33,7 +33,7 @@ class TypePages
                 return $item;
             })
             // Uma entrada por promoção (código do enum); TIPO_FOLHA vem digitado com variações de maiúsculas
-            ->unique(fn ($item) => $item->PROCFIT_TIPO)
+            ->unique(fn($item) => $item->PROCFIT_TIPO)
             ->values();
     }
 }

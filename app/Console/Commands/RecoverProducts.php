@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Dto\Payload;
+use App\Enums\PrintOrigin;
 use App\Events\StorePapersGenerated;
 use App\Mail\RecoverProductsFailed;
 use App\Models\DailyProducts;
@@ -124,7 +125,7 @@ class RecoverProducts extends Command
 
                     $dto = Payload::fromArray($data);
                     $dto = $dto->withClubMaxPrice(ClubProductsQuery::clubIds($dto->resultIds()));
-                    $logger = $requestLogger->handle($dto);
+                    $logger = $requestLogger->handle($dto, PrintOrigin::COMANDO);
 
                     /** Os listeners de PaperGenerated salvam os caminhos e, sem --agrupar, notificam a loja */
                     $paths = $generator->handle($logger, $dto, true, $perPaper, notify: ! $agrupar);

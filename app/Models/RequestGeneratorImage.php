@@ -21,7 +21,8 @@ class RequestGeneratorImage extends Model
         'LOJA',
         'PATH_PDF',
         'TOTAL_PRODUTOS',
-        'DOWNLOAD_REALIZADO'
+        'DOWNLOAD_REALIZADO',
+        'ORIGEM_IMPRESSAO'
     ];
 
     public $timestamps = false;

@@ -2,6 +2,7 @@
 
 namespace App\Query;
 
+use App\Enums\PrintOrigin;
 use App\Enums\TypePages as TypePagesEnum;
 use App\Models\DailyProducts;
 use App\Models\FamiliaProduto;
@@ -15,9 +16,26 @@ use Illuminate\Support\Collection;
 
 class PdfByStoreQuery
 {
+    public const HORAS = 72;
+
+    /** PDFs gerados pelo comando products:recover nas últimas 72 horas, sem olhar a vigência da promoção */
     public static function getPdfByStore(Request $request): Collection
     {
-        return self::rows(self::query($request));
+        return self::rows(
+            self::generatedInLastHours(self::query($request))
+                ->where('RGP.ORIGEM_IMPRESSAO', PrintOrigin::COMANDO->value),
+        );
+    }
+
+    /** Requisições com PDF gerado nas últimas 72 horas */
+    public static function generatedInLastHours(Builder $query): Builder
+    {
+        return $query
+            ->whereRaw(
+                'CAST(RGP.DATA_REQUISICAO AS DATETIME) + CAST(RGP.HORA_REQUISICAO AS DATETIME) >= ?',
+                [now()->subHours(self::HORAS)->format('Y-m-d\TH:i:s')],
+            )
+            ->whereNotNull('RGP.PATH_PDF');
     }
 
     /** Requisições da loja com produtos, família e promoção, aplicando os filtros opcionais do request */
@@ -34,9 +52,6 @@ class PdfByStoreQuery
             ->leftJoin(self::table(new DailyProducts, 'C'), 'C.ID', '=', 'B.ETIQUETA_PLACAS_RESULTADO_ID')
             ->leftJoin(self::table(new Products, 'D'), 'B.PRODUTO', '=', 'D.PRODUTO')
             ->leftJoin(self::table(new FamiliaProduto, 'F'), 'F.FAMILIA_PRODUTO', '=', 'B.FAMILIA')
-            ->whereRaw(
-                '(B.ETIQUETA_PLACAS_RESULTADO_ID IS NULL OR CAST(GETDATE() AS DATE) BETWEEN C.DATA_INICIAL AND C.DATA_FINAL)',
-            )
             ->where('RGP.LOJA', $request->store)
             ->when($request->filled('template'), function ($query) use ($request) {
                 $query->where('RGP.TEMPLATE_ID', $request->template);

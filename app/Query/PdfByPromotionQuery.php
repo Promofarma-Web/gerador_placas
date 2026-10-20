@@ -9,17 +9,13 @@ use Illuminate\Support\Collection;
 
 class PdfByPromotionQuery
 {
-    public const HORAS = 72;
-
-    /** PDFs já gerados para a loja nas últimas 72 horas, opcionalmente filtrados pela promoção (PROCFIT_TIPO) */
+    /** PDFs já gerados para a loja nas últimas 72 horas, com promoção vigente, opcionalmente filtrados pela promoção (PROCFIT_TIPO) */
     public static function getPdfByPromotion(Request $request): Collection
     {
-        $query = PdfByStoreQuery::query($request)
+        $query = PdfByStoreQuery::generatedInLastHours(PdfByStoreQuery::query($request))
             ->whereRaw(
-                'CAST(RGP.DATA_REQUISICAO AS DATETIME) + CAST(RGP.HORA_REQUISICAO AS DATETIME) >= ?',
-                [now()->subHours(self::HORAS)->format('Y-m-d\TH:i:s')],
-            )
-            ->whereNotNull('RGP.PATH_PDF');
+                '(B.ETIQUETA_PLACAS_RESULTADO_ID IS NULL OR CAST(GETDATE() AS DATE) BETWEEN C.DATA_INICIAL AND C.DATA_FINAL)',
+            );
 
         return PdfByStoreQuery::rows($query);
     }

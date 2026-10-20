@@ -43,6 +43,9 @@ class DailyProductsQuery
                     default => 2,
                 };
 
+                /** Valor da tabela antes da troca abaixo, usado no Por_2 do Promoclube */
+                $item->PRECO_PROMOCAO_ORIGINAL = $item->PRECO_PROMOCAO;
+
                 $item->PRECO_PROMOCAO = TypePagesEnum::precoPromocao(
                     $item->PROCFIT_TIPO,
                     $item->PRECO_PROMOCAO,

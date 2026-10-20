@@ -8,6 +8,8 @@ final readonly class PayloadProduct
 {
     private const CLUB_PREFIX = 'de R$ ';
 
+    private const CLUB_SAIL_PREFIX = 'por R$ ';
+
     public function __construct(
         public int $product,
         public int $family,
@@ -27,6 +29,7 @@ final readonly class PayloadProduct
         public ?string $x,
         public ?string $y,
         public ?int $nameplate_label_printing,
+        public ?string $club_sail_price,
     ) {}
 
     public static function fromArray(array $data): self
@@ -54,7 +57,23 @@ final readonly class PayloadProduct
             nameplate_label_printing: isset($data['nameplate_label_printing'])
                 ? (int) $data['nameplate_label_printing']
                 : null,
+            /** O comando envia já calculado com o PRECO_PROMOCAO original; a requisição padrão calcula aqui */
+            club_sail_price: array_key_exists('club_sail_price', $data)
+                ? $data['club_sail_price']
+                : self::clubSailPrice($data['sail_price'] ?? null, $data['promotion_price'] ?? null),
         );
+    }
+
+    /** Por_2 do Promoclube: nulo quando PRECO_VENDA = PRECO_PROMOCAO, senão o PRECO_VENDA */
+    public static function clubSailPrice(mixed $sailPrice, mixed $promotionPrice): ?string
+    {
+        if (blank($sailPrice)) {
+            return null;
+        }
+
+        $toFloat = fn(mixed $value): ?float => blank($value) ? null : (float) str_replace(',', '.', (string) $value);
+
+        return $toFloat($sailPrice) === $toFloat($promotionPrice) ? null : (string) $sailPrice;
     }
 
     public function toArray(): array
@@ -81,6 +100,8 @@ final readonly class PayloadProduct
             'X' => $this->x,
             'Y' => $this->y,
             'nameplate_label_printing' => $this->nameplate_label_printing,
+            /** Camada Por_2 do Promoclube: por R$ 75,12 */
+            'club_sail_price' => blank($this->club_sail_price) ? null : self::CLUB_SAIL_PREFIX . $this->club_sail_price,
         ];
     }
 

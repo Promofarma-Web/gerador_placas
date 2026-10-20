@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Dto\Payload;
+use App\Dto\PayloadProduct;
 use App\Enums\PrintOrigin;
 use App\Events\StorePapersGenerated;
 use App\Mail\RecoverProductsFailed;
@@ -109,6 +110,9 @@ class RecoverProducts extends Command
                             'y' => $product->PAGUE,
                             'nameplate_label_printing' => $product->ID,
                             'family' => $product->FAMILIA_PRODUTO,
+                            'club_sail_price' => $this->decimalComma(
+                                PayloadProduct::clubSailPrice($product->PRECO_VENDA, $product->PRECO_PROMOCAO_ORIGINAL),
+                            ),
                         ];
                     })
                     ->values()

@@ -18,23 +18,78 @@ class PdfByStoreQuery
 {
     public const HORAS = 72;
 
-    /** PDFs gerados pelo comando products:recover nas últimas 72 horas, sem olhar a vigência da promoção */
+    /** Janela das etiquetas sem vigência (gôndola e reduzidas) no Recuperar PDF */
+    public const DIAS_SEM_VIGENCIA = 30;
+
+    /** Data/hora da requisição (DATA_REQUISICAO e HORA_REQUISICAO ficam em colunas separadas) */
+    private const REQUESTED_AT = 'CAST(RGP.DATA_REQUISICAO AS DATETIME) + CAST(RGP.HORA_REQUISICAO AS DATETIME)';
+
+    /**
+     * PDFs da loja com promoção vigente ou etiquetas sem vigência dos últimos 30 dias, opcionalmente filtrados pela origem (rotina diária ou intranet).
+     * Para cada loja + produto (ou família) + promoção fica só o PDF mais recente.
+     */
     public static function getPdfByStore(Request $request): Collection
     {
         return self::rows(
-            self::generatedInLastHours(self::query($request))
-                ->where('RGP.ORIGEM_IMPRESSAO', PrintOrigin::COMANDO->value),
+            RequestGeneratorImage::query()
+                ->fromSub(self::filteredByStore($request), 'R')
+                ->where('R.RN', 1)
+                // Mais novo primeiro
+                ->orderByDesc('R.DATA_REQUISICAO')
+                ->orderByDesc('R.HORA_REQUISICAO')
+                ->orderByDesc('R.REQUISICAO_GERADOR_PLACAS')
+                ->select('R.*'),
+        );
+    }
+
+    /** Linhas do Recuperar PDF numeradas da mais recente para a mais antiga por loja + produto (ou família) + promoção */
+    private static function filteredByStore(Request $request): Builder
+    {
+        $origin = PrintOrigin::tryFrom((string) $request->origem);
+
+        return self::query($request)
+            ->whereNotNull('RGP.PATH_PDF')
+            ->where(fn (Builder $query) => $query
+                ->whereRaw('CAST(GETDATE() AS DATE) BETWEEN C.DATA_INICIAL AND C.DATA_FINAL')
+                // Sem vigência: reduzidas sem promoção vinculada e ETIQUETAS_GONDULA (datas nulas)
+                ->orWhere(fn (Builder $query) => $query
+                    ->whereRaw('(B.ETIQUETA_PLACAS_RESULTADO_ID IS NULL OR C.DATA_INICIAL IS NULL)')
+                    ->whereRaw(self::REQUESTED_AT . ' >= ?', [now()->subDays(self::DIAS_SEM_VIGENCIA)->format('Y-m-d\TH:i:s')])))
+            ->when(
+                $origin === PrintOrigin::COMANDO,
+                fn (Builder $query) => $query->where('RGP.ORIGEM_IMPRESSAO', PrintOrigin::COMANDO->value),
+            )
+            // Requisições anteriores à coluna ORIGEM_IMPRESSAO ficam nulas e vieram da geração padrão
+            ->when(
+                $origin === PrintOrigin::PADRAO,
+                fn (Builder $query) => $query->where(fn (Builder $query) => $query
+                    ->where('RGP.ORIGEM_IMPRESSAO', PrintOrigin::PADRAO->value)
+                    ->orWhereNull('RGP.ORIGEM_IMPRESSAO')),
+            )
+            // SQL Server não aceita ORDER BY em subquery; a ordenação vai para a query externa
+            ->reorder()
+            // Linhas de família vêm com PRODUTO = 0, então a família entra na chave só nesses casos
+            ->selectRaw(
+                'ROW_NUMBER() OVER (
+                    PARTITION BY RGP.LOJA, ISNULL(B.PRODUTO, 0), CASE WHEN ISNULL(B.PRODUTO, 0) = 0 THEN B.FAMILIA END, C.PROCFIT_TIPO
+                    ORDER BY RGP.DATA_REQUISICAO DESC, RGP.HORA_REQUISICAO DESC, RGP.REQUISICAO_GERADOR_PLACAS DESC
+                ) AS RN',
+            );
+    }
+
+    /** Produtos sem promoção, sem vigência (ex.: ETIQUETAS_GONDULA vem com datas nulas) ou com promoção vigente hoje */
+    public static function vigentes(Builder $query): Builder
+    {
+        return $query->whereRaw(
+            '(B.ETIQUETA_PLACAS_RESULTADO_ID IS NULL OR C.DATA_INICIAL IS NULL OR CAST(GETDATE() AS DATE) BETWEEN C.DATA_INICIAL AND C.DATA_FINAL)',
         );
     }
 
     /** Requisições com PDF gerado nas últimas 72 horas */
-    public static function generatedInLastHours(Builder $query): Builder
+    public static function generatedInLastHours(Builder $query, int $hours = self::HORAS): Builder
     {
         return $query
-            ->whereRaw(
-                'CAST(RGP.DATA_REQUISICAO AS DATETIME) + CAST(RGP.HORA_REQUISICAO AS DATETIME) >= ?',
-                [now()->subHours(self::HORAS)->format('Y-m-d\TH:i:s')],
-            )
+            ->whereRaw(self::REQUESTED_AT . ' >= ?', [now()->subHours($hours)->format('Y-m-d\TH:i:s')])
             ->whereNotNull('RGP.PATH_PDF');
     }
 

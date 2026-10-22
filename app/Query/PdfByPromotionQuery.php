@@ -12,10 +12,7 @@ class PdfByPromotionQuery
     /** PDFs já gerados para a loja nas últimas 72 horas, com promoção vigente, opcionalmente filtrados pela promoção (PROCFIT_TIPO) */
     public static function getPdfByPromotion(Request $request): Collection
     {
-        $query = PdfByStoreQuery::generatedInLastHours(PdfByStoreQuery::query($request))
-            ->whereRaw(
-                '(B.ETIQUETA_PLACAS_RESULTADO_ID IS NULL OR CAST(GETDATE() AS DATE) BETWEEN C.DATA_INICIAL AND C.DATA_FINAL)',
-            );
+        $query = PdfByStoreQuery::vigentes(PdfByStoreQuery::generatedInLastHours(PdfByStoreQuery::query($request)));
 
         return PdfByStoreQuery::rows($query);
     }

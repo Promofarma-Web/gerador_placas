@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\PrintOrigin;
 use App\Enums\TypePages;
 use App\Http\Controllers\Concerns\RecoversPdfData;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class RecoverPdfByStore extends Controller
             'produto'  => 'nullable|integer',
             'familia'  => 'nullable|integer',
             'promocao' => ['nullable', Rule::in(TypePages::codes())],
+            'origem'   => ['nullable', Rule::enum(PrintOrigin::class)],
         ]);
 
         return $this->recoverPdfByStoreResponse($request);

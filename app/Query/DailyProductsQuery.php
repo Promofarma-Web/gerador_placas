@@ -22,6 +22,8 @@ class DailyProductsQuery
             ->whereNotNull('ID_TEMPLATE')
             ->whereNotNull('LOJA')
             ->where('loja', $loja)
+            ->where('PROCFIT_TIPO', '!=', TypePagesEnum::PRODUTOS_PV->value)
+            /** Mesma regra da USP_PROMOCOES_CONSULTA_PRODUTO: promoção vigente hoje, exceto ETIQUETAS_GONDULA */
             /** Mesma regra da USP_PROMOCOES_CONSULTA_PRODUTO: promoção vigente hoje, exceto ETIQUETAS_GONDULA */
             ->where(function ($query) {
                 $query->where('PROCFIT_TIPO', TypePagesEnum::ETIQUETAS_GONDULA->value)
@@ -34,7 +36,7 @@ class DailyProductsQuery
             })
             ->get()
             /** Filtra em PHP: whereNotIn estoura o limite de 2100 parâmetros do SQL Server */
-            ->reject(fn ($item) => isset($idsGerados[$item->ID]))
+            ->reject(fn($item) => isset($idsGerados[$item->ID]))
             ->values()
             ->map(function ($item) {
                 $item->TIPO_TEMPLATE = match (true) {

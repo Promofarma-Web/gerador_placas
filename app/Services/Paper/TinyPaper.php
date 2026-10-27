@@ -43,8 +43,11 @@ class TinyPaper implements PaperInterface
         $tmpFiles = [];
 
         try {
+            /** Cópias da mesma imagem usam o mesmo arquivo: o FPDF processa e embute cada arquivo uma vez só */
+            $saved = [];
+
             foreach ($base64Images as $index => $base64Image) {
-                $tmpFiles[$index] = $this->saveTempImage($base64Image, $dir, $filename.'_tmp_'.$index);
+                $tmpFiles[$index] = $saved[md5($base64Image)] ??= $this->saveTempImage($base64Image, $dir, $filename.'_tmp_'.$index);
             }
 
             $filePath = $dir.'/'.$filename.'_'.now()->format('YmdHis').'.pdf';

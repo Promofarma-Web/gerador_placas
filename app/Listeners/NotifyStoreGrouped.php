@@ -29,6 +29,8 @@ final class NotifyStoreGrouped
                 'registros' => $registros,
                 'pendentes' => PendingDownloadQuery::getByStore($event->store),
             ]),
+            /** TEMPORÁRIO (testes do products:recover): todas as notificações vão para a loja 1 */
+            recipient: 1,
         );
 
         $this->sender->send($payload);

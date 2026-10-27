@@ -16,9 +16,14 @@ class DailyProducts extends Model
 
     public $timestamps = false;
 
-    public static function getDailyProducts($loja, bool $todos = false)
+    public static function getDailyProducts(array $lojas, bool $todos = false)
     {
-        return DailyProductsQuery::getDailyProducts($loja, $todos);
+        return DailyProductsQuery::getDailyProducts($lojas, $todos);
+    }
+
+    public static function getStores(): array
+    {
+        return DailyProductsQuery::getStores();
     }
 
     public static function getTipoFolha($loja)

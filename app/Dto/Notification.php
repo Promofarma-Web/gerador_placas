@@ -22,14 +22,15 @@ final readonly class Notification
         return self::fromStore((int) $logger->LOJA, $content);
     }
 
-    public static function fromStore(int $store, View $content): self
+    /** $recipient troca quem recebe a notificação; o título continua com a loja de origem */
+    public static function fromStore(int $store, View $content, ?int $recipient = null): self
     {
         return new self(
             title: "Precificação - Loja {$store}",
             content: $content,
             categoryId: 13,
             userId: 2,
-            recipientIds: [$store],
+            recipientIds: [$recipient ?? $store],
         );
     }
 

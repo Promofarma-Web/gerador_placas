@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
 
 final class BatchLabelGenerator
 {
-    private const PER_PAPER = 25;
+    private const PER_PAPER = 1000;
 
     public function __construct(
         public GenerateImage $image,

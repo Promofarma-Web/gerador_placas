@@ -45,7 +45,7 @@ final readonly class PayloadProduct
             max_price: isset($data['max_price']) ? (string) $data['max_price'] : null,
             sail_price: isset($data['sail_price']) ? (string) $data['sail_price'] : null,
             promotion_price: isset($data['promotion_price']) ? (string) $data['promotion_price'] : null,
-            percentage_discount: isset($data['percentage_discount']) ? (string) $data['percentage_discount'] : null,
+            percentage_discount: isset($data['percentage_discount']) ?  $data['percentage_discount'] : null,
             initial_date: $data['initial_date'] ?? null,
             final_date: $data['final_date'] ?? null,
             buy: isset($data['buy']) ? (string) $data['buy'] : null,
